@@ -449,7 +449,7 @@ class SKYCASTERAPITester:
         
         headers = {'Authorization': f'Bearer {admin_token}'}
         params = {'limit': 10, 'skip': 0}
-        success, data, status = self.make_request('GET', '/admin/support-tickets', headers=headers, params=params)
+        success, data, status = self.make_request('GET', '/api/v1/admin/support-tickets', headers=headers, params=params)
         
         if success and status == 200:
             tickets_count = len(data) if isinstance(data, list) else 0
