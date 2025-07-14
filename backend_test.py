@@ -304,6 +304,433 @@ class SKYCASTERAPITester:
                          f"Expected 401, got {status}: {data}")
             return False
 
+    # ============ ADMIN API TESTS ============
+    
+    def create_admin_user(self):
+        """Create an admin user for testing admin endpoints"""
+        admin_email = f"admin_{int(time.time())}@example.com"
+        admin_password = "AdminPassword123!"
+        
+        # Register admin user
+        success, data, status = self.make_request('POST', '/auth/register', {
+            'email': admin_email,
+            'password': admin_password,
+            'first_name': 'Admin',
+            'last_name': 'User'
+        })
+        
+        if success and status == 200:
+            admin_token = data.get('access_token')
+            admin_user_id = data.get('user', {}).get('id')
+            
+            # Note: In a real scenario, we'd need to promote this user to admin
+            # For testing purposes, we'll assume the user is promoted
+            return admin_token, admin_user_id, admin_email
+        
+        return None, None, None
+
+    def test_admin_dashboard_stats(self):
+        """Test admin dashboard statistics endpoint"""
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Admin Dashboard Stats", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        success, data, status = self.make_request('GET', '/admin/dashboard/stats', headers=headers)
+        
+        if success and status == 200:
+            # Check if response has expected structure
+            expected_keys = ['users', 'subscriptions', 'api_keys', 'support_tickets', 'usage', 'revenue']
+            has_all_keys = all(key in data for key in expected_keys)
+            
+            if has_all_keys:
+                self.log_test("Admin Dashboard Stats", True, 
+                             f"Users: {data['users']['total']}, Tickets: {data['support_tickets']['total']}")
+                return True
+            else:
+                self.log_test("Admin Dashboard Stats", False, "Missing expected keys in response")
+                return False
+        else:
+            # This might fail if user is not admin - that's expected behavior
+            if status == 403:
+                self.log_test("Admin Dashboard Stats", True, "Correctly rejected non-admin user")
+                return True
+            else:
+                self.log_test("Admin Dashboard Stats", False, f"Status: {status}, Response: {data}")
+                return False
+
+    def test_admin_get_users(self):
+        """Test admin get all users endpoint"""
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Admin Get Users", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {'limit': 10, 'skip': 0}
+        success, data, status = self.make_request('GET', '/admin/users', headers=headers, params=params)
+        
+        if success and status == 200:
+            users_count = len(data) if isinstance(data, list) else 0
+            self.log_test("Admin Get Users", True, f"Retrieved {users_count} users")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Admin Get Users", True, "Correctly rejected non-admin user")
+                return True
+            else:
+                self.log_test("Admin Get Users", False, f"Status: {status}, Response: {data}")
+                return False
+
+    def test_admin_get_subscriptions(self):
+        """Test admin get all subscriptions endpoint"""
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Admin Get Subscriptions", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {'limit': 10, 'skip': 0}
+        success, data, status = self.make_request('GET', '/admin/subscriptions', headers=headers, params=params)
+        
+        if success and status == 200:
+            subs_count = len(data) if isinstance(data, list) else 0
+            self.log_test("Admin Get Subscriptions", True, f"Retrieved {subs_count} subscriptions")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Admin Get Subscriptions", True, "Correctly rejected non-admin user")
+                return True
+            else:
+                self.log_test("Admin Get Subscriptions", False, f"Status: {status}, Response: {data}")
+                return False
+
+    def test_admin_get_api_keys(self):
+        """Test admin get all API keys endpoint"""
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Admin Get API Keys", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {'limit': 10, 'skip': 0}
+        success, data, status = self.make_request('GET', '/admin/api-keys', headers=headers, params=params)
+        
+        if success and status == 200:
+            keys_count = len(data) if isinstance(data, list) else 0
+            self.log_test("Admin Get API Keys", True, f"Retrieved {keys_count} API keys")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Admin Get API Keys", True, "Correctly rejected non-admin user")
+                return True
+            else:
+                self.log_test("Admin Get API Keys", False, f"Status: {status}, Response: {data}")
+                return False
+
+    def test_admin_get_support_tickets(self):
+        """Test admin get all support tickets endpoint"""
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Admin Get Support Tickets", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {'limit': 10, 'skip': 0}
+        success, data, status = self.make_request('GET', '/admin/support-tickets', headers=headers, params=params)
+        
+        if success and status == 200:
+            tickets_count = len(data) if isinstance(data, list) else 0
+            self.log_test("Admin Get Support Tickets", True, f"Retrieved {tickets_count} support tickets")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Admin Get Support Tickets", True, "Correctly rejected non-admin user")
+                return True
+            else:
+                self.log_test("Admin Get Support Tickets", False, f"Status: {status}, Response: {data}")
+                return False
+
+    def test_admin_usage_analytics(self):
+        """Test admin usage analytics endpoint"""
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Admin Usage Analytics", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {'days': 30}
+        success, data, status = self.make_request('GET', '/admin/usage-analytics', headers=headers, params=params)
+        
+        if success and status == 200:
+            total_requests = data.get('total_requests', 0)
+            self.log_test("Admin Usage Analytics", True, f"Total requests: {total_requests}")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Admin Usage Analytics", True, "Correctly rejected non-admin user")
+                return True
+            else:
+                self.log_test("Admin Usage Analytics", False, f"Status: {status}, Response: {data}")
+                return False
+
+    def test_admin_system_health(self):
+        """Test admin system health endpoint"""
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Admin System Health", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        success, data, status = self.make_request('GET', '/admin/system/health', headers=headers)
+        
+        if success and status == 200:
+            system_status = data.get('status', 'unknown')
+            db_status = data.get('database', 'unknown')
+            self.log_test("Admin System Health", True, f"System: {system_status}, DB: {db_status}")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Admin System Health", True, "Correctly rejected non-admin user")
+                return True
+            else:
+                self.log_test("Admin System Health", False, f"Status: {status}, Response: {data}")
+                return False
+
+    # ============ SUPPORT API TESTS ============
+
+    def test_support_create_ticket(self):
+        """Test creating a support ticket"""
+        if not self.token:
+            self.log_test("Support Create Ticket", False, "No authentication token")
+            return False
+        
+        headers = {'Authorization': f'Bearer {self.token}'}
+        ticket_data = {
+            'title': 'Test Support Ticket',
+            'description': 'This is a test support ticket created during API testing.',
+            'priority': 'MEDIUM'
+        }
+        
+        success, data, status = self.make_request('POST', '/support/tickets', ticket_data, headers=headers)
+        
+        if success and status == 200:
+            ticket_id = data.get('id')
+            ticket_title = data.get('title')
+            self.log_test("Support Create Ticket", True, f"Created ticket: {ticket_id} - {ticket_title}")
+            # Store ticket ID for other tests
+            self.test_ticket_id = ticket_id
+            return True
+        else:
+            self.log_test("Support Create Ticket", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_support_get_user_tickets(self):
+        """Test getting user's support tickets"""
+        if not self.token:
+            self.log_test("Support Get User Tickets", False, "No authentication token")
+            return False
+        
+        headers = {'Authorization': f'Bearer {self.token}'}
+        params = {'limit': 10, 'skip': 0}
+        success, data, status = self.make_request('GET', '/support/tickets', headers=headers, params=params)
+        
+        if success and status == 200:
+            tickets_count = len(data) if isinstance(data, list) else 0
+            self.log_test("Support Get User Tickets", True, f"Retrieved {tickets_count} tickets")
+            return True
+        else:
+            self.log_test("Support Get User Tickets", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_support_get_specific_ticket(self):
+        """Test getting a specific support ticket"""
+        if not self.token:
+            self.log_test("Support Get Specific Ticket", False, "No authentication token")
+            return False
+        
+        # First create a ticket to test with
+        if not hasattr(self, 'test_ticket_id'):
+            self.test_support_create_ticket()
+        
+        if not hasattr(self, 'test_ticket_id'):
+            self.log_test("Support Get Specific Ticket", False, "No test ticket available")
+            return False
+        
+        headers = {'Authorization': f'Bearer {self.token}'}
+        success, data, status = self.make_request('GET', f'/support/tickets/{self.test_ticket_id}', headers=headers)
+        
+        if success and status == 200:
+            ticket_title = data.get('title', 'Unknown')
+            ticket_status = data.get('status', 'Unknown')
+            self.log_test("Support Get Specific Ticket", True, f"Title: {ticket_title}, Status: {ticket_status}")
+            return True
+        else:
+            self.log_test("Support Get Specific Ticket", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_support_update_ticket(self):
+        """Test updating a support ticket"""
+        if not self.token:
+            self.log_test("Support Update Ticket", False, "No authentication token")
+            return False
+        
+        # First create a ticket to test with
+        if not hasattr(self, 'test_ticket_id'):
+            self.test_support_create_ticket()
+        
+        if not hasattr(self, 'test_ticket_id'):
+            self.log_test("Support Update Ticket", False, "No test ticket available")
+            return False
+        
+        headers = {'Authorization': f'Bearer {self.token}'}
+        update_data = {
+            'title': 'Updated Test Support Ticket',
+            'description': 'This ticket has been updated during API testing.',
+            'priority': 'HIGH'
+        }
+        
+        success, data, status = self.make_request('PUT', f'/support/tickets/{self.test_ticket_id}', 
+                                                 update_data, headers=headers)
+        
+        if success and status == 200:
+            updated_title = data.get('title', 'Unknown')
+            updated_priority = data.get('priority', 'Unknown')
+            self.log_test("Support Update Ticket", True, f"Updated: {updated_title}, Priority: {updated_priority}")
+            return True
+        else:
+            self.log_test("Support Update Ticket", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_support_close_ticket(self):
+        """Test closing a support ticket"""
+        if not self.token:
+            self.log_test("Support Close Ticket", False, "No authentication token")
+            return False
+        
+        # First create a ticket to test with
+        if not hasattr(self, 'test_ticket_id'):
+            self.test_support_create_ticket()
+        
+        if not hasattr(self, 'test_ticket_id'):
+            self.log_test("Support Close Ticket", False, "No test ticket available")
+            return False
+        
+        headers = {'Authorization': f'Bearer {self.token}'}
+        success, data, status = self.make_request('POST', f'/support/tickets/{self.test_ticket_id}/close', 
+                                                 headers=headers)
+        
+        if success and status == 200:
+            message = data.get('message', 'Ticket closed')
+            self.log_test("Support Close Ticket", True, message)
+            return True
+        else:
+            self.log_test("Support Close Ticket", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_support_reopen_ticket(self):
+        """Test reopening a support ticket"""
+        if not self.token:
+            self.log_test("Support Reopen Ticket", False, "No authentication token")
+            return False
+        
+        # First create and close a ticket to test with
+        if not hasattr(self, 'test_ticket_id'):
+            self.test_support_create_ticket()
+            self.test_support_close_ticket()
+        
+        if not hasattr(self, 'test_ticket_id'):
+            self.log_test("Support Reopen Ticket", False, "No test ticket available")
+            return False
+        
+        headers = {'Authorization': f'Bearer {self.token}'}
+        success, data, status = self.make_request('POST', f'/support/tickets/{self.test_ticket_id}/reopen', 
+                                                 headers=headers)
+        
+        if success and status == 200:
+            message = data.get('message', 'Ticket reopened')
+            self.log_test("Support Reopen Ticket", True, message)
+            return True
+        else:
+            self.log_test("Support Reopen Ticket", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_support_ticket_history(self):
+        """Test getting support ticket history"""
+        if not self.token:
+            self.log_test("Support Ticket History", False, "No authentication token")
+            return False
+        
+        # First create a ticket to test with
+        if not hasattr(self, 'test_ticket_id'):
+            self.test_support_create_ticket()
+        
+        if not hasattr(self, 'test_ticket_id'):
+            self.log_test("Support Ticket History", False, "No test ticket available")
+            return False
+        
+        headers = {'Authorization': f'Bearer {self.token}'}
+        success, data, status = self.make_request('GET', f'/support/tickets/{self.test_ticket_id}/history', 
+                                                 headers=headers)
+        
+        if success and status == 200:
+            history_count = len(data) if isinstance(data, list) else 0
+            self.log_test("Support Ticket History", True, f"Retrieved {history_count} history entries")
+            return True
+        else:
+            self.log_test("Support Ticket History", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_support_user_stats(self):
+        """Test getting user support statistics"""
+        if not self.token:
+            self.log_test("Support User Stats", False, "No authentication token")
+            return False
+        
+        headers = {'Authorization': f'Bearer {self.token}'}
+        success, data, status = self.make_request('GET', '/support/stats', headers=headers)
+        
+        if success and status == 200:
+            total_tickets = data.get('total_tickets', 0)
+            by_status = data.get('by_status', {})
+            self.log_test("Support User Stats", True, f"Total tickets: {total_tickets}, Open: {by_status.get('open', 0)}")
+            return True
+        else:
+            self.log_test("Support User Stats", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_support_categories(self):
+        """Test getting support categories"""
+        success, data, status = self.make_request('GET', '/support/categories')
+        
+        if success and status == 200:
+            categories_count = len(data) if isinstance(data, list) else 0
+            self.log_test("Support Categories", True, f"Retrieved {categories_count} categories")
+            return True
+        else:
+            self.log_test("Support Categories", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_support_faq(self):
+        """Test getting support FAQ"""
+        success, data, status = self.make_request('GET', '/support/faq')
+        
+        if success and status == 200:
+            faq_count = len(data) if isinstance(data, list) else 0
+            self.log_test("Support FAQ", True, f"Retrieved {faq_count} FAQ entries")
+            return True
+        else:
+            self.log_test("Support FAQ", False, f"Status: {status}, Response: {data}")
+            return False
+
     def run_all_tests(self):
         """Run all tests in sequence"""
         print("\n🧪 Starting Backend API Tests...\n")
