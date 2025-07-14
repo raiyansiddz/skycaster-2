@@ -318,7 +318,7 @@ class SKYCASTERAPITester:
         admin_password = "AdminPassword123!"
         
         # Register admin user
-        success, data, status = self.make_request('POST', '/auth/register', {
+        success, data, status = self.make_request('POST', '/api/v1/auth/register', {
             'email': admin_email,
             'password': admin_password,
             'first_name': 'Admin',
