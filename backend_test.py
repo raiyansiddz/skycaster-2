@@ -715,7 +715,7 @@ class SKYCASTERAPITester:
 
     def test_support_categories(self):
         """Test getting support categories"""
-        success, data, status = self.make_request('GET', '/support/categories')
+        success, data, status = self.make_request('GET', '/api/v1/support/categories')
         
         if success and status == 200:
             categories_count = len(data) if isinstance(data, list) else 0
