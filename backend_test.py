@@ -344,7 +344,7 @@ class SKYCASTERAPITester:
             return False
         
         headers = {'Authorization': f'Bearer {admin_token}'}
-        success, data, status = self.make_request('GET', '/admin/dashboard/stats', headers=headers)
+        success, data, status = self.make_request('GET', '/api/v1/admin/dashboard/stats', headers=headers)
         
         if success and status == 200:
             # Check if response has expected structure
