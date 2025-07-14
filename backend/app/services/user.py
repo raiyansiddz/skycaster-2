@@ -174,3 +174,15 @@ class UserService:
         db.commit()
         db.refresh(user)
         return user
+    
+    @staticmethod
+    def activate_user(db: Session, user_id: str) -> Optional[User]:
+        """Activate user account"""
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return None
+        
+        user.is_active = True
+        db.commit()
+        db.refresh(user)
+        return user
