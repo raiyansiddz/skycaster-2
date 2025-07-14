@@ -253,7 +253,7 @@ class SKYCASTERAPITester:
 
     def test_subscription_tiers(self):
         """Test subscription tiers endpoint"""
-        success, data, status = self.make_request('GET', '/subscription-tiers')
+        success, data, status = self.make_request('GET', '/api/v1/subscriptions/plans')
         
         if success and status == 200:
             tiers_count = len(data.get('tiers', [])) if isinstance(data.get('tiers'), list) else 0
