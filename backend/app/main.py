@@ -20,8 +20,8 @@ from app.models import Base
 setup_logging()
 logger = logging.getLogger(__name__)
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+# Note: Database tables are created via Alembic migrations
+# Base.metadata.create_all(bind=engine)
 
 # Create FastAPI app
 app = FastAPI(
