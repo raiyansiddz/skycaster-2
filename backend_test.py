@@ -256,7 +256,13 @@ class SKYCASTERAPITester:
         success, data, status = self.make_request('GET', '/api/v1/subscriptions/plans')
         
         if success and status == 200:
-            tiers_count = len(data.get('tiers', [])) if isinstance(data.get('tiers'), list) else 0
+            # Handle both list and dict responses
+            if isinstance(data, list):
+                tiers_count = len(data)
+            elif isinstance(data, dict) and 'tiers' in data:
+                tiers_count = len(data.get('tiers', []))
+            else:
+                tiers_count = 0
             self.log_test("Subscription Tiers", True, f"Available tiers: {tiers_count}")
             return True
         else:
