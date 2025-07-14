@@ -53,6 +53,8 @@ class SKYCASTERAPITester:
                 response = self.session.get(url, headers=request_headers, params=params)
             elif method.upper() == 'POST':
                 response = self.session.post(url, json=data, headers=request_headers, params=params)
+            elif method.upper() == 'PUT':
+                response = self.session.put(url, json=data, headers=request_headers, params=params)
             elif method.upper() == 'DELETE':
                 response = self.session.delete(url, headers=request_headers, params=params)
             else:
