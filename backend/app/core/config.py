@@ -1,6 +1,6 @@
 import os
 from pydantic_settings import BaseSettings
-from typing import Optional
+from typing import Optional, Dict, Any, ClassVar
 
 class Settings(BaseSettings):
     # Database
