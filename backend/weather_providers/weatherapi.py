@@ -69,7 +69,40 @@ class WeatherAPIProvider(WeatherProvider):
     
     async def search_locations(self, query: str) -> WeatherResponse:
         """Search for locations"""
-        return await self._make_request("search.json", {"q": query})
+        try:
+            params = {"q": query}
+            params['key'] = self.api_key
+            url = f"{self.base_url}/search.json"
+            
+            logger.info(f"Making request to: {url} with params: {params}")
+            
+            response = await self.client.get(url, params=params)
+            
+            if response.status_code == 200:
+                data = response.json()
+                # WeatherAPI search returns a list, so we wrap it in a dict
+                return WeatherResponse(
+                    success=True,
+                    data={"locations": data},  # Wrap list in dict
+                    provider="weatherapi.com",
+                    usage_cost=1.0
+                )
+            else:
+                error_msg = f"API Error: {response.status_code} - {response.text}"
+                logger.error(error_msg)
+                return WeatherResponse(
+                    success=False,
+                    error=error_msg,
+                    provider="weatherapi.com"
+                )
+        except Exception as e:
+            error_msg = f"Request failed: {str(e)}"
+            logger.error(error_msg)
+            return WeatherResponse(
+                success=False,
+                error=error_msg,
+                provider="weatherapi.com"
+            )
     
     async def get_ip_lookup(self, ip: str) -> WeatherResponse:
         """Get IP location data"""
