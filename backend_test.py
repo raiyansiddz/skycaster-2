@@ -479,7 +479,7 @@ class SKYCASTERAPITester:
         
         headers = {'Authorization': f'Bearer {admin_token}'}
         params = {'days': 30}
-        success, data, status = self.make_request('GET', '/api/v1/admin/usage_analytics', headers=headers, params=params)
+        success, data, status = self.make_request('GET', '/api/v1/admin/usage-analytics', headers=headers, params=params)
         
         if success and status == 200:
             total_requests = data.get('total_requests', 0)
