@@ -523,7 +523,7 @@ class SKYCASTERAPITester:
         ticket_data = {
             'title': 'Test Support Ticket',
             'description': 'This is a test support ticket created during API testing.',
-            'priority': 'MEDIUM'
+            'priority': 'medium'
         }
         
         success, data, status = self.make_request('POST', '/api/v1/support/tickets', ticket_data, headers=headers)
