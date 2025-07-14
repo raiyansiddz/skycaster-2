@@ -832,8 +832,8 @@ class SKYCASTERAPITester:
 
 def main():
     """Main test execution"""
-    # Use localhost for testing since external routing is not configured for backend
-    base_url = "http://localhost:8001"
+    # Use the configured backend URL from environment
+    base_url = "https://36714c42-2f1b-4a6f-ba27-745e116ebf0f.preview.emergentagent.com"
     
     tester = SKYCASTERAPITester(base_url)
     success = tester.run_all_tests()
