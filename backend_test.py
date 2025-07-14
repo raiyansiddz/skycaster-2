@@ -238,7 +238,7 @@ class SKYCASTERAPITester:
             return False
             
         headers = {'Authorization': f'Bearer {self.token}'}
-        success, data, status = self.make_request('GET', '/usage', headers=headers)
+        success, data, status = self.make_request('GET', '/api/v1/usage', headers=headers)
         
         if success and status == 200:
             current_usage = data.get('current_month_usage', 0)
