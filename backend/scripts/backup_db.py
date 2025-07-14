@@ -49,20 +49,21 @@ async def backup_database():
                 backup_data["schema_version"] = result.scalar()
             except:
                 backup_data["schema_version"] = "unknown"
+        
+        # Backup each table in separate transactions
+        tables = [
+            ("users", User),
+            ("api_keys", ApiKey),
+            ("subscriptions", Subscription),
+            ("usage_logs", UsageLog),
+            ("invoices", Invoice),
+            ("support_tickets", SupportTicket)
+        ]
+        
+        for table_name, model_class in tables:
+            print(f"  📋 Backing up {table_name}...")
             
-            # Backup each table
-            tables = [
-                ("users", User),
-                ("api_keys", ApiKey),
-                ("subscriptions", Subscription),
-                ("usage_logs", UsageLog),
-                ("invoices", Invoice),
-                ("support_tickets", SupportTicket)
-            ]
-            
-            for table_name, model_class in tables:
-                print(f"  📋 Backing up {table_name}...")
-                
+            async with engine.begin() as conn:
                 # Get all records
                 result = await conn.execute(select(model_class))
                 records = result.fetchall()
