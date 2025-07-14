@@ -45,6 +45,56 @@ class EmailService:
             return False
     
     @staticmethod
+    def send_support_ticket_notification(
+        user_email: str,
+        user_name: str,
+        ticket_id: str,
+        ticket_title: str,
+        ticket_description: str,
+        priority: str
+    ) -> bool:
+        """Send support ticket notification email"""
+        subject = f"Support Ticket Created - {ticket_title}"
+        
+        html_content = f"""
+        <html>
+            <body>
+                <h2>New Support Ticket Created</h2>
+                <p><strong>Ticket ID:</strong> {ticket_id}</p>
+                <p><strong>User:</strong> {user_name} ({user_email})</p>
+                <p><strong>Title:</strong> {ticket_title}</p>
+                <p><strong>Priority:</strong> {priority}</p>
+                <p><strong>Description:</strong></p>
+                <p>{ticket_description}</p>
+                <hr>
+                <p>Please log in to the admin dashboard to manage this ticket.</p>
+            </body>
+        </html>
+        """
+        
+        text_content = f"""
+        New Support Ticket Created
+        
+        Ticket ID: {ticket_id}
+        User: {user_name} ({user_email})
+        Title: {ticket_title}
+        Priority: {priority}
+        
+        Description:
+        {ticket_description}
+        
+        Please log in to the admin dashboard to manage this ticket.
+        """
+        
+        # Send to support team (admin email)
+        return EmailService.send_email(
+            to_email=settings.ADMIN_EMAIL,
+            subject=subject,
+            html_content=html_content,
+            text_content=text_content
+        )
+
+    @staticmethod
     def send_welcome_email(user_email: str, user_name: str) -> bool:
         """Send welcome email to new user"""
         subject = "Welcome to SKYCASTER Weather API!"
