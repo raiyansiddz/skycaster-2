@@ -12,7 +12,6 @@ engine = create_engine(
     pool_size=20,
     max_overflow=30,
     pool_recycle=3600,
-    connect_args={"options": "-csearch_path=public"}
 )
 
 # Create session
