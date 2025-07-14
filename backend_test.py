@@ -42,7 +42,11 @@ class SKYCASTERAPITester:
     def make_request(self, method: str, endpoint: str, data: Optional[Dict] = None, 
                     headers: Optional[Dict] = None, params: Optional[Dict] = None) -> tuple:
         """Make HTTP request and return (success, response_data, status_code)"""
-        url = f"{self.base_url}/api/{endpoint.lstrip('/')}"
+        # For localhost testing, use direct endpoint paths
+        if endpoint.startswith('/'):
+            url = f"{self.base_url}{endpoint}"
+        else:
+            url = f"{self.base_url}/{endpoint}"
         
         request_headers = {'Content-Type': 'application/json'}
         if headers:
