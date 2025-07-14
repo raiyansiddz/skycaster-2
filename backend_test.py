@@ -132,6 +132,9 @@ class SKYCASTERAPITester:
             self.log_test("Get API Keys", True, f"Found {api_keys_count} API keys")
             return True
         else:
+            # Debug: Print token info for troubleshooting
+            print(f"   DEBUG: Token length: {len(self.token) if self.token else 0}")
+            print(f"   DEBUG: Token starts with: {self.token[:20] if self.token else 'None'}...")
             self.log_test("Get API Keys", False, f"Status: {status}, Response: {data}")
             return False
 
