@@ -38,7 +38,7 @@ def setup_logging():
         "logs/skycaster.log",
         rotation="10 MB",
         retention="1 week",
-        compression="gzip",
+        compression="gz",
         level="INFO"
     )
     
