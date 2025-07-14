@@ -52,6 +52,11 @@ class SKYCASTERAPITester:
         if headers:
             request_headers.update(headers)
         
+        # Debug: Print headers for authentication endpoints
+        if '/api-keys' in endpoint or '/usage' in endpoint:
+            print(f"   DEBUG: Making request to {url}")
+            print(f"   DEBUG: Headers: {request_headers}")
+        
         try:
             if method.upper() == 'GET':
                 response = self.session.get(url, headers=request_headers, params=params)
@@ -63,6 +68,11 @@ class SKYCASTERAPITester:
                 response = self.session.delete(url, headers=request_headers, params=params)
             else:
                 return False, {"error": f"Unsupported method: {method}"}, 0
+            
+            # Debug: Print response for authentication endpoints
+            if '/api-keys' in endpoint or '/usage' in endpoint:
+                print(f"   DEBUG: Response status: {response.status_code}")
+                print(f"   DEBUG: Response headers: {dict(response.headers)}")
             
             try:
                 response_data = response.json()
