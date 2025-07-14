@@ -736,7 +736,7 @@ class SKYCASTERAPITester:
         print("\n🧪 Starting Backend API Tests...\n")
         
         # Core functionality tests
-        tests = [
+        core_tests = [
             self.test_health_check,
             self.test_user_registration,
             self.test_user_login,
@@ -752,7 +752,61 @@ class SKYCASTERAPITester:
             self.test_invalid_api_key,
         ]
         
-        for test in tests:
+        # Admin API tests
+        admin_tests = [
+            self.test_admin_dashboard_stats,
+            self.test_admin_get_users,
+            self.test_admin_get_subscriptions,
+            self.test_admin_get_api_keys,
+            self.test_admin_get_support_tickets,
+            self.test_admin_usage_analytics,
+            self.test_admin_system_health,
+        ]
+        
+        # Support API tests
+        support_tests = [
+            self.test_support_create_ticket,
+            self.test_support_get_user_tickets,
+            self.test_support_get_specific_ticket,
+            self.test_support_update_ticket,
+            self.test_support_close_ticket,
+            self.test_support_reopen_ticket,
+            self.test_support_ticket_history,
+            self.test_support_user_stats,
+            self.test_support_categories,
+            self.test_support_faq,
+        ]
+        
+        # Run all tests
+        all_tests = core_tests + admin_tests + support_tests
+        
+        print("=" * 60)
+        print("🔧 CORE API TESTS")
+        print("=" * 60)
+        
+        for test in core_tests:
+            try:
+                test()
+            except Exception as e:
+                self.log_test(test.__name__, False, f"Exception: {str(e)}")
+            print()  # Add spacing between tests
+        
+        print("=" * 60)
+        print("👑 ADMIN API TESTS")
+        print("=" * 60)
+        
+        for test in admin_tests:
+            try:
+                test()
+            except Exception as e:
+                self.log_test(test.__name__, False, f"Exception: {str(e)}")
+            print()  # Add spacing between tests
+        
+        print("=" * 60)
+        print("🎫 SUPPORT API TESTS")
+        print("=" * 60)
+        
+        for test in support_tests:
             try:
                 test()
             except Exception as e:
