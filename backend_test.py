@@ -496,7 +496,7 @@ class SKYCASTERAPITester:
             return False
         
         headers = {'Authorization': f'Bearer {admin_token}'}
-        success, data, status = self.make_request('GET', '/admin/system/health', headers=headers)
+        success, data, status = self.make_request('GET', '/api/v1/admin/system/health', headers=headers)
         
         if success and status == 200:
             system_status = data.get('status', 'unknown')
