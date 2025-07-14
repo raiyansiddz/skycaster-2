@@ -4,7 +4,7 @@
 
 # Configuration
 BACKUP_DIR="/app/backend/backups"
-DB_URL="postgresql://neondb_owner:npg_2bUiOWoTX0Rg@ep-misty-meadow-a1prskmn-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+DB_URL="postgresql://neondb_owner:npg_2bUiOWoTX0Rg@ep-misty-meadow-a1prskmn-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
 BACKUP_NAME="skycaster_backup_$(date +%Y%m%d_%H%M%S).sql"
 RETENTION_DAYS=7
 
