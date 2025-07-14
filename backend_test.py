@@ -526,7 +526,7 @@ class SKYCASTERAPITester:
             'priority': 'MEDIUM'
         }
         
-        success, data, status = self.make_request('POST', '/support/tickets', ticket_data, headers=headers)
+        success, data, status = self.make_request('POST', '/api/v1/support/tickets', ticket_data, headers=headers)
         
         if success and status == 200:
             ticket_id = data.get('id')
