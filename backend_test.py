@@ -727,7 +727,7 @@ class SKYCASTERAPITester:
 
     def test_support_faq(self):
         """Test getting support FAQ"""
-        success, data, status = self.make_request('GET', '/support/faq')
+        success, data, status = self.make_request('GET', '/api/v1/support/faq')
         
         if success and status == 200:
             faq_count = len(data) if isinstance(data, list) else 0
