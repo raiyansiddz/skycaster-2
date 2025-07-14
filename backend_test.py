@@ -604,7 +604,7 @@ class SKYCASTERAPITester:
             'priority': 'HIGH'
         }
         
-        success, data, status = self.make_request('PUT', f'/support/tickets/{self.test_ticket_id}', 
+        success, data, status = self.make_request('PUT', f'/api/v1/support/tickets/{self.test_ticket_id}', 
                                                  update_data, headers=headers)
         
         if success and status == 200:
