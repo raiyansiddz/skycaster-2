@@ -11,13 +11,16 @@ RETENTION_DAYS=7
 # Create backup directory if it doesn't exist
 mkdir -p "$BACKUP_DIR"
 
-# Create backup
+# Create backup using the --no-sync option for compatibility
 echo "Creating backup: $BACKUP_NAME"
-pg_dump "$DB_URL" > "$BACKUP_DIR/$BACKUP_NAME"
+pg_dump --no-sync --verbose "$DB_URL" > "$BACKUP_DIR/$BACKUP_NAME"
 
 # Check if backup was successful
 if [ $? -eq 0 ]; then
     echo "Backup created successfully: $BACKUP_DIR/$BACKUP_NAME"
+    
+    # Show backup size
+    du -h "$BACKUP_DIR/$BACKUP_NAME"
     
     # Compress backup
     gzip "$BACKUP_DIR/$BACKUP_NAME"
@@ -29,7 +32,7 @@ if [ $? -eq 0 ]; then
     
     # List current backups
     echo "Current backups:"
-    ls -la "$BACKUP_DIR"/skycaster_backup_*.sql.gz
+    ls -la "$BACKUP_DIR"/skycaster_backup_*.sql.gz 2>/dev/null || echo "No previous backups found"
 else
     echo "Backup failed!"
     exit 1
