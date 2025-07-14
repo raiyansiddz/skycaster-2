@@ -125,7 +125,7 @@ class SKYCASTERAPITester:
             return False
             
         headers = {'Authorization': f'Bearer {self.token}'}
-        success, data, status = self.make_request('GET', '/api/v1/api-keys', headers=headers)
+        success, data, status = self.make_request('GET', '/api/v1/api_keys', headers=headers)
         
         if success and status == 200:
             api_keys_count = len(data) if isinstance(data, list) else 0
