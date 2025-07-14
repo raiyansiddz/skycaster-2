@@ -601,7 +601,7 @@ class SKYCASTERAPITester:
         update_data = {
             'title': 'Updated Test Support Ticket',
             'description': 'This ticket has been updated during API testing.',
-            'priority': 'HIGH'
+            'priority': 'high'
         }
         
         success, data, status = self.make_request('PUT', f'/api/v1/support/tickets/{self.test_ticket_id}', 
