@@ -90,19 +90,19 @@ class SKYCASTERAPITester:
         test_email = f"test_user_{int(time.time())}@example.com"
         test_password = "TestPassword123!"
         
-        success, data, status = self.make_request('POST', '/auth/register', {
+        success, data, status = self.make_request('POST', '/api/v1/auth/register', {
             'email': test_email,
             'password': test_password
         })
         
         if success and status == 200:
-            self.token = data.get('token')
+            self.token = data.get('access_token')
             self.user_id = data.get('user', {}).get('id')
             api_key_info = data.get('api_key', {})
             self.api_key = api_key_info.get('key')
             
             self.log_test("User Registration", True, 
-                         f"User ID: {self.user_id}, API Key: {self.api_key[:8]}...")
+                         f"User ID: {self.user_id}, API Key: {self.api_key[:8] if self.api_key else 'None'}...")
             return True
         else:
             self.log_test("User Registration", False, f"Status: {status}, Response: {data}")
