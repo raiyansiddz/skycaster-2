@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     CELERY_RESULT_BACKEND: str = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379")
     
     # Rate Limiting
-    RATE_LIMITS = {
+    RATE_LIMITS: ClassVar[Dict[str, Dict[str, int]]] = {
         "free": {"requests_per_minute": 60, "requests_per_month": 5000},
         "developer": {"requests_per_minute": 600, "requests_per_month": 50000},
         "business": {"requests_per_minute": 1800, "requests_per_month": 200000},
@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     }
     
     # Subscription Plans
-    SUBSCRIPTION_PLANS = {
+    SUBSCRIPTION_PLANS: ClassVar[Dict[str, Dict[str, Any]]] = {
         "free": {"name": "Free", "price": 0, "stripe_price_id": ""},
         "developer": {"name": "Developer", "price": 999, "stripe_price_id": "price_developer"},
         "business": {"name": "Business", "price": 3999, "stripe_price_id": "price_business"},
