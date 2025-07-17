@@ -25,6 +25,7 @@ class ApiKey(Base):
     # Relationships
     user = relationship("User", back_populates="api_keys")
     usage_logs = relationship("UsageLog", back_populates="api_key", cascade="all, delete-orphan")
+    weather_requests = relationship("WeatherRequest", back_populates="api_key", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<ApiKey(id={self.id}, name={self.name}, user_id={self.user_id})>"
