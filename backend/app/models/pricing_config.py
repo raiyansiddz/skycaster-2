@@ -10,7 +10,7 @@ class PricingConfig(Base):
     """Model for storing dynamic pricing configuration"""
     __tablename__ = "pricing_config"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Pricing details
     variable_name = Column(String(100), nullable=False, unique=True)
@@ -32,7 +32,7 @@ class PricingConfig(Base):
     # Metadata
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    created_by = Column(String, ForeignKey("users.id"))
     is_active = Column(Boolean, default=True)
     
     # Relationships
@@ -42,7 +42,7 @@ class CurrencyConfig(Base):
     """Model for storing currency configuration"""
     __tablename__ = "currency_config"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Currency details
     currency_code = Column(String(5), nullable=False, unique=True)
@@ -64,7 +64,7 @@ class VariableMapping(Base):
     """Model for storing variable to endpoint mapping"""
     __tablename__ = "variable_mapping"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Variable details
     variable_name = Column(String(100), nullable=False, unique=True)
@@ -85,11 +85,11 @@ class WeatherRequest(Base):
     """Model for storing weather request logs with new Skycaster system"""
     __tablename__ = "weather_requests"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     
     # Request details
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    api_key_id = Column(UUID(as_uuid=True), ForeignKey("api_keys.id"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    api_key_id = Column(String, ForeignKey("api_keys.id"), nullable=False)
     
     # Request parameters
     locations = Column(Text, nullable=False)  # JSON array of [lat, lon] pairs
