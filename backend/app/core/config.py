@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     WEATHER_API_KEY: str = os.getenv("WEATHER_API_KEY", "08e9d66860b74ffaa1c184858251407")
     WEATHER_API_BASE_URL: str = os.getenv("WEATHER_API_BASE_URL", "https://api.weatherapi.com/v1")
     
+    # Skycaster Weather API
+    USE_MOCK_WEATHER: bool = os.getenv("USE_MOCK_WEATHER", "false").lower() == "true"
+    
     # Sentry
     SENTRY_DSN: Optional[str] = os.getenv("SENTRY_DSN")
     
