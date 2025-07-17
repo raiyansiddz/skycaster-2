@@ -166,43 +166,380 @@ class SKYCASTERAPITester:
             self.log_test("Create API Key", False, f"Status: {status}, Response: {data}")
             return False
 
-    def test_weather_current(self):
-        """Test current weather endpoint"""
+    # ============ NEW SKYCASTER WEATHER API TESTS ============
+    
+    def test_skycaster_weather_health(self):
+        """Test Skycaster weather health check endpoint"""
+        success, data, status = self.make_request('GET', '/api/v1/weather/health')
+        
+        if success and status == 200:
+            service_status = data.get('status', 'unknown')
+            mock_mode = data.get('mock_mode', False)
+            endpoints = data.get('endpoints', {})
+            self.log_test("Skycaster Weather Health", True, 
+                         f"Status: {service_status}, Mock: {mock_mode}, Endpoints: {len(endpoints)}")
+            return True
+        else:
+            self.log_test("Skycaster Weather Health", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_skycaster_weather_variables(self):
+        """Test Skycaster supported variables endpoint"""
         if not self.api_key:
-            self.log_test("Weather Current", False, "No API key available")
+            self.log_test("Skycaster Weather Variables", False, "No API key available")
+            return False
+            
+        headers = {'X-API-Key': self.api_key}
+        success, data, status = self.make_request('GET', '/api/v1/weather/variables', headers=headers)
+        
+        if success and status == 200:
+            variables = data.get('variables', [])
+            endpoints = data.get('endpoints', {})
+            omega_vars = len(endpoints.get('omega', []))
+            nova_vars = len(endpoints.get('nova', []))
+            arc_vars = len(endpoints.get('arc', []))
+            self.log_test("Skycaster Weather Variables", True, 
+                         f"Total variables: {len(variables)}, Omega: {omega_vars}, Nova: {nova_vars}, Arc: {arc_vars}")
+            return True
+        else:
+            self.log_test("Skycaster Weather Variables", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_skycaster_weather_pricing(self):
+        """Test Skycaster pricing information endpoint"""
+        if not self.api_key:
+            self.log_test("Skycaster Weather Pricing", False, "No API key available")
+            return False
+            
+        headers = {'X-API-Key': self.api_key}
+        success, data, status = self.make_request('GET', '/api/v1/weather/pricing', headers=headers)
+        
+        if success and status == 200:
+            pricing = data.get('pricing', [])
+            calculation_example = data.get('calculation_example', {})
+            example_cost = calculation_example.get('final_amount', 0)
+            currency = calculation_example.get('currency', 'INR')
+            self.log_test("Skycaster Weather Pricing", True, 
+                         f"Pricing configs: {len(pricing)}, Example cost: {example_cost} {currency}")
+            return True
+        else:
+            self.log_test("Skycaster Weather Pricing", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_skycaster_weather_usage_stats(self):
+        """Test Skycaster weather usage statistics endpoint"""
+        if not self.token:
+            self.log_test("Skycaster Weather Usage Stats", False, "No authentication token")
+            return False
+            
+        headers = {'Authorization': f'Bearer {self.token}'}
+        success, data, status = self.make_request('GET', '/api/v1/weather/usage/stats', headers=headers)
+        
+        if success and status == 200:
+            total_requests = data.get('total_requests', 0)
+            total_cost = data.get('total_cost', 0)
+            currency = data.get('currency', 'INR')
+            success_rate = data.get('success_rate', 0)
+            self.log_test("Skycaster Weather Usage Stats", True, 
+                         f"Requests: {total_requests}, Cost: {total_cost} {currency}, Success: {success_rate}%")
+            return True
+        else:
+            self.log_test("Skycaster Weather Usage Stats", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_skycaster_weather_forecast_valid(self):
+        """Test Skycaster weather forecast with valid data"""
+        if not self.api_key:
+            self.log_test("Skycaster Weather Forecast (Valid)", False, "No API key available")
+            return False
+            
+        headers = {'X-API-Key': self.api_key}
+        forecast_data = {
+            "list_lat_lon": [[28.6139, 77.2090], [19.0760, 72.8777]],  # Delhi, Mumbai
+            "timestamp": "2025-07-18 14:00:00",
+            "variables": ["ambient_temp(K)", "relative_humidity(%)", "ghi(W/m2)"],
+            "timezone": "Asia/Kolkata"
+        }
+        
+        success, data, status = self.make_request('POST', '/api/v1/weather/forecast', 
+                                                 forecast_data, headers=headers)
+        
+        if success and status == 200:
+            location_data = data.get('location_data', {})
+            metadata = data.get('metadata', {})
+            locations_count = metadata.get('locations_count', 0)
+            endpoints_called = metadata.get('endpoints_called', [])
+            final_amount = metadata.get('final_amount', '0')
+            
+            self.log_test("Skycaster Weather Forecast (Valid)", True, 
+                         f"Locations: {locations_count}, Endpoints: {endpoints_called}, Cost: {final_amount}")
+            return True
+        else:
+            self.log_test("Skycaster Weather Forecast (Valid)", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_skycaster_weather_forecast_invalid_variables(self):
+        """Test Skycaster weather forecast with invalid variables"""
+        if not self.api_key:
+            self.log_test("Skycaster Weather Forecast (Invalid Variables)", False, "No API key available")
+            return False
+            
+        headers = {'X-API-Key': self.api_key}
+        forecast_data = {
+            "list_lat_lon": [[28.6139, 77.2090]],
+            "timestamp": "2025-07-18 14:00:00",
+            "variables": ["invalid_variable", "another_invalid_var"],
+            "timezone": "Asia/Kolkata"
+        }
+        
+        success, data, status = self.make_request('POST', '/api/v1/weather/forecast', 
+                                                 forecast_data, headers=headers)
+        
+        if not success and status == 400:
+            error_detail = data.get('detail', '')
+            self.log_test("Skycaster Weather Forecast (Invalid Variables)", True, 
+                         f"Correctly rejected invalid variables: {error_detail}")
+            return True
+        else:
+            self.log_test("Skycaster Weather Forecast (Invalid Variables)", False, 
+                         f"Expected 400 error, got {status}: {data}")
+            return False
+
+    def test_skycaster_weather_forecast_invalid_coordinates(self):
+        """Test Skycaster weather forecast with invalid coordinates"""
+        if not self.api_key:
+            self.log_test("Skycaster Weather Forecast (Invalid Coordinates)", False, "No API key available")
+            return False
+            
+        headers = {'X-API-Key': self.api_key}
+        forecast_data = {
+            "list_lat_lon": [[91.0, 181.0]],  # Invalid lat/lon
+            "timestamp": "2025-07-18 14:00:00",
+            "variables": ["ambient_temp(K)"],
+            "timezone": "Asia/Kolkata"
+        }
+        
+        success, data, status = self.make_request('POST', '/api/v1/weather/forecast', 
+                                                 forecast_data, headers=headers)
+        
+        if not success and status == 422:
+            error_detail = data.get('detail', [])
+            self.log_test("Skycaster Weather Forecast (Invalid Coordinates)", True, 
+                         f"Correctly rejected invalid coordinates: {len(error_detail)} validation errors")
+            return True
+        else:
+            self.log_test("Skycaster Weather Forecast (Invalid Coordinates)", False, 
+                         f"Expected 422 error, got {status}: {data}")
+            return False
+
+    def test_skycaster_weather_forecast_invalid_timestamp(self):
+        """Test Skycaster weather forecast with invalid timestamp"""
+        if not self.api_key:
+            self.log_test("Skycaster Weather Forecast (Invalid Timestamp)", False, "No API key available")
+            return False
+            
+        headers = {'X-API-Key': self.api_key}
+        forecast_data = {
+            "list_lat_lon": [[28.6139, 77.2090]],
+            "timestamp": "invalid-timestamp-format",
+            "variables": ["ambient_temp(K)"],
+            "timezone": "Asia/Kolkata"
+        }
+        
+        success, data, status = self.make_request('POST', '/api/v1/weather/forecast', 
+                                                 forecast_data, headers=headers)
+        
+        if not success and status == 422:
+            error_detail = data.get('detail', [])
+            self.log_test("Skycaster Weather Forecast (Invalid Timestamp)", True, 
+                         f"Correctly rejected invalid timestamp: {len(error_detail)} validation errors")
+            return True
+        else:
+            self.log_test("Skycaster Weather Forecast (Invalid Timestamp)", False, 
+                         f"Expected 422 error, got {status}: {data}")
+            return False
+
+    def test_skycaster_weather_forecast_empty_variables(self):
+        """Test Skycaster weather forecast with empty variables array"""
+        if not self.api_key:
+            self.log_test("Skycaster Weather Forecast (Empty Variables)", False, "No API key available")
+            return False
+            
+        headers = {'X-API-Key': self.api_key}
+        forecast_data = {
+            "list_lat_lon": [[28.6139, 77.2090]],
+            "timestamp": "2025-07-18 14:00:00",
+            "variables": [],  # Empty variables array
+            "timezone": "Asia/Kolkata"
+        }
+        
+        success, data, status = self.make_request('POST', '/api/v1/weather/forecast', 
+                                                 forecast_data, headers=headers)
+        
+        if not success and status == 422:
+            error_detail = data.get('detail', [])
+            self.log_test("Skycaster Weather Forecast (Empty Variables)", True, 
+                         f"Correctly rejected empty variables: {len(error_detail)} validation errors")
+            return True
+        else:
+            self.log_test("Skycaster Weather Forecast (Empty Variables)", False, 
+                         f"Expected 422 error, got {status}: {data}")
+            return False
+
+    def test_skycaster_weather_forecast_mixed_endpoints(self):
+        """Test Skycaster weather forecast with variables from different endpoints"""
+        if not self.api_key:
+            self.log_test("Skycaster Weather Forecast (Mixed Endpoints)", False, "No API key available")
+            return False
+            
+        headers = {'X-API-Key': self.api_key}
+        forecast_data = {
+            "list_lat_lon": [[28.6139, 77.2090]],
+            "timestamp": "2025-07-18 14:00:00",
+            "variables": [
+                "ambient_temp(K)",      # Omega endpoint
+                "ghi(W/m2)",           # Nova endpoint  
+                "ct"                   # Arc endpoint
+            ],
+            "timezone": "Asia/Kolkata"
+        }
+        
+        success, data, status = self.make_request('POST', '/api/v1/weather/forecast', 
+                                                 forecast_data, headers=headers)
+        
+        if success and status == 200:
+            metadata = data.get('metadata', {})
+            endpoints_called = metadata.get('endpoints_called', [])
+            expected_endpoints = ['omega', 'nova', 'arc']
+            
+            # Check if all three endpoints were called
+            all_endpoints_called = all(endpoint in endpoints_called for endpoint in expected_endpoints)
+            
+            self.log_test("Skycaster Weather Forecast (Mixed Endpoints)", True, 
+                         f"Called endpoints: {endpoints_called}, All expected: {all_endpoints_called}")
+            return True
+        else:
+            self.log_test("Skycaster Weather Forecast (Mixed Endpoints)", False, 
+                         f"Status: {status}, Response: {data}")
+            return False
+
+    def test_skycaster_weather_forecast_multiple_locations(self):
+        """Test Skycaster weather forecast with multiple locations"""
+        if not self.api_key:
+            self.log_test("Skycaster Weather Forecast (Multiple Locations)", False, "No API key available")
+            return False
+            
+        headers = {'X-API-Key': self.api_key}
+        locations = [
+            [28.6139, 77.2090],  # Delhi
+            [19.0760, 72.8777],  # Mumbai
+            [13.0827, 80.2707],  # Chennai
+            [22.5726, 88.3639],  # Kolkata
+            [12.9716, 77.5946]   # Bangalore
+        ]
+        
+        forecast_data = {
+            "list_lat_lon": locations,
+            "timestamp": "2025-07-18 14:00:00",
+            "variables": ["ambient_temp(K)", "relative_humidity(%)"],
+            "timezone": "Asia/Kolkata"
+        }
+        
+        success, data, status = self.make_request('POST', '/api/v1/weather/forecast', 
+                                                 forecast_data, headers=headers)
+        
+        if success and status == 200:
+            location_data = data.get('location_data', {})
+            metadata = data.get('metadata', {})
+            locations_count = metadata.get('locations_count', 0)
+            final_amount = metadata.get('final_amount', '0')
+            
+            self.log_test("Skycaster Weather Forecast (Multiple Locations)", True, 
+                         f"Processed {locations_count} locations, Data keys: {len(location_data)}, Cost: {final_amount}")
+            return True
+        else:
+            self.log_test("Skycaster Weather Forecast (Multiple Locations)", False, 
+                         f"Status: {status}, Response: {data}")
+            return False
+
+    def test_skycaster_weather_forecast_different_timezones(self):
+        """Test Skycaster weather forecast with different timezones"""
+        if not self.api_key:
+            self.log_test("Skycaster Weather Forecast (Different Timezones)", False, "No API key available")
+            return False
+            
+        timezones_to_test = [
+            "Asia/Kolkata",
+            "UTC", 
+            "America/New_York",
+            "Europe/London"
+        ]
+        
+        successful_tests = 0
+        
+        for timezone in timezones_to_test:
+            headers = {'X-API-Key': self.api_key}
+            forecast_data = {
+                "list_lat_lon": [[28.6139, 77.2090]],
+                "timestamp": "2025-07-18 14:00:00",
+                "variables": ["ambient_temp(K)"],
+                "timezone": timezone
+            }
+            
+            success, data, status = self.make_request('POST', '/api/v1/weather/forecast', 
+                                                     forecast_data, headers=headers)
+            
+            if success and status == 200:
+                successful_tests += 1
+        
+        if successful_tests == len(timezones_to_test):
+            self.log_test("Skycaster Weather Forecast (Different Timezones)", True, 
+                         f"Successfully tested {successful_tests}/{len(timezones_to_test)} timezones")
+            return True
+        else:
+            self.log_test("Skycaster Weather Forecast (Different Timezones)", False, 
+                         f"Only {successful_tests}/{len(timezones_to_test)} timezones worked")
+            return False
+
+    # ============ LEGACY WEATHER API TESTS (for backward compatibility) ============
+    
+    def test_weather_current(self):
+        """Test current weather endpoint (Legacy)"""
+        if not self.api_key:
+            self.log_test("Weather Current (Legacy)", False, "No API key available")
             return False
             
         headers = {'X-API-Key': self.api_key}
         params = {'location': 'London'}
-        success, data, status = self.make_request('GET', '/api/v1/weather/current', 
+        success, data, status = self.make_request('GET', '/api/v1/weather-legacy/current', 
                                                  headers=headers, params=params)
         
         if success and status == 200:
             location = data.get('data', {}).get('location', {}).get('name', 'Unknown')
             temp = data.get('data', {}).get('current', {}).get('temp_c', 'N/A')
-            self.log_test("Weather Current", True, f"Location: {location}, Temp: {temp}°C")
+            self.log_test("Weather Current (Legacy)", True, f"Location: {location}, Temp: {temp}°C")
             return True
         else:
-            self.log_test("Weather Current", False, f"Status: {status}, Response: {data}")
+            self.log_test("Weather Current (Legacy)", False, f"Status: {status}, Response: {data}")
             return False
 
     def test_weather_forecast(self):
-        """Test weather forecast endpoint"""
+        """Test weather forecast endpoint (Legacy)"""
         if not self.api_key:
-            self.log_test("Weather Forecast", False, "No API key available")
+            self.log_test("Weather Forecast (Legacy)", False, "No API key available")
             return False
             
         headers = {'X-API-Key': self.api_key}
         params = {'location': 'London', 'days': 3}
-        success, data, status = self.make_request('GET', '/api/v1/weather/forecast', 
+        success, data, status = self.make_request('GET', '/api/v1/weather-legacy/forecast', 
                                                  headers=headers, params=params)
         
         if success and status == 200:
             forecast_days = len(data.get('data', {}).get('forecast', {}).get('forecastday', []))
-            self.log_test("Weather Forecast", True, f"Forecast days: {forecast_days}")
+            self.log_test("Weather Forecast (Legacy)", True, f"Forecast days: {forecast_days}")
             return True
         else:
-            self.log_test("Weather Forecast", False, f"Status: {status}, Response: {data}")
+            self.log_test("Weather Forecast (Legacy)", False, f"Status: {status}, Response: {data}")
             return False
 
     def test_weather_search(self):
