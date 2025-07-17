@@ -852,7 +852,7 @@ class SKYCASTERAPITester:
 def main():
     """Main test execution"""
     # Use the backend URL from frontend .env file
-    base_url = "https://5abe78e2-3c39-45fb-97ba-6e8a5eeb37ca.preview.emergentagent.com"
+    base_url = "https://63daacc8-aa49-48f7-8875-1beff80be395.preview.emergentagent.com"
     
     tester = SKYCASTERAPITester(base_url)
     success = tester.run_all_tests()
