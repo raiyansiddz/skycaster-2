@@ -1104,14 +1104,34 @@ class SKYCASTERAPITester:
             self.test_user_login,
             self.test_get_api_keys,
             self.test_create_api_key,
-            self.test_weather_current,
-            self.test_weather_forecast,
-            self.test_weather_search,
-            self.test_weather_astronomy,
             self.test_usage_analytics,
             self.test_subscription_tiers,
             self.test_rate_limiting,
             self.test_invalid_api_key,
+        ]
+        
+        # New Skycaster Weather API tests
+        skycaster_weather_tests = [
+            self.test_skycaster_weather_health,
+            self.test_skycaster_weather_variables,
+            self.test_skycaster_weather_pricing,
+            self.test_skycaster_weather_usage_stats,
+            self.test_skycaster_weather_forecast_valid,
+            self.test_skycaster_weather_forecast_invalid_variables,
+            self.test_skycaster_weather_forecast_invalid_coordinates,
+            self.test_skycaster_weather_forecast_invalid_timestamp,
+            self.test_skycaster_weather_forecast_empty_variables,
+            self.test_skycaster_weather_forecast_mixed_endpoints,
+            self.test_skycaster_weather_forecast_multiple_locations,
+            self.test_skycaster_weather_forecast_different_timezones,
+        ]
+        
+        # Legacy weather API tests
+        legacy_weather_tests = [
+            self.test_weather_current,
+            self.test_weather_forecast,
+            self.test_weather_search,
+            self.test_weather_astronomy,
         ]
         
         # Admin API tests
@@ -1140,13 +1160,33 @@ class SKYCASTERAPITester:
         ]
         
         # Run all tests
-        all_tests = core_tests + admin_tests + support_tests
-        
         print("=" * 60)
         print("🔧 CORE API TESTS")
         print("=" * 60)
         
         for test in core_tests:
+            try:
+                test()
+            except Exception as e:
+                self.log_test(test.__name__, False, f"Exception: {str(e)}")
+            print()  # Add spacing between tests
+        
+        print("=" * 60)
+        print("🌤️  NEW SKYCASTER WEATHER API TESTS")
+        print("=" * 60)
+        
+        for test in skycaster_weather_tests:
+            try:
+                test()
+            except Exception as e:
+                self.log_test(test.__name__, False, f"Exception: {str(e)}")
+            print()  # Add spacing between tests
+        
+        print("=" * 60)
+        print("🌦️  LEGACY WEATHER API TESTS")
+        print("=" * 60)
+        
+        for test in legacy_weather_tests:
             try:
                 test()
             except Exception as e:
