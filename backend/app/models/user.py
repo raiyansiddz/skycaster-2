@@ -44,6 +44,8 @@ class User(Base):
     usage_logs = relationship("UsageLog", back_populates="user", cascade="all, delete-orphan")
     invoices = relationship("Invoice", back_populates="user", cascade="all, delete-orphan")
     support_tickets = relationship("SupportTicket", back_populates="user", cascade="all, delete-orphan")
+    pricing_configs = relationship("PricingConfig", back_populates="creator")
+    weather_requests = relationship("WeatherRequest", back_populates="user", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email})>"
