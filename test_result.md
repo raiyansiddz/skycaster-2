@@ -134,7 +134,7 @@ backend:
 
   - task: "Backend API Testing"
     implemented: true
-    working: "partial"
+    working: "unknown"
     file: "/app/backend_test.py"
     stuck_count: 0
     priority: "high"
@@ -143,6 +143,9 @@ backend:
       - working: "partial"
         agent: "main"
         comment: "Backend test suite now running with 22/42 tests passing (52.4% success rate). Major issues: 1) Authentication 403 errors for protected endpoints 2) Weather API 500 errors 3) Missing API key requirements on some endpoints."
+      - working: "unknown"
+        agent: "main"
+        comment: "Backend server configuration fixed and now responding to health checks. Need to re-run comprehensive testing to verify all endpoints, especially authentication and weather API functions."
 
   - task: "Authentication API Routes Testing"
     implemented: true
