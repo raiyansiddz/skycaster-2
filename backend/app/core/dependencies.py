@@ -16,7 +16,7 @@ security = HTTPBearer()
 
 def get_current_user(
     db: Session = Depends(get_db),
-    token: str = Depends(security)
+    credentials: HTTPAuthorizationCredentials = Depends(security)
 ) -> User:
     """Get current authenticated user from JWT token"""
     credentials_exception = HTTPException(
@@ -26,7 +26,7 @@ def get_current_user(
     )
     
     # Verify token
-    payload = AuthService.verify_token(token.credentials)
+    payload = AuthService.verify_token(credentials.credentials)
     if payload is None:
         raise credentials_exception
     
