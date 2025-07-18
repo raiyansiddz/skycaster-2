@@ -24,53 +24,63 @@ class RateLimitService:
         Check if API key has exceeded rate limits
         Returns (is_allowed, limit_info)
         """
-        limits = settings.RATE_LIMITS.get(plan.value, settings.RATE_LIMITS["free"])
-        
-        # Check minute rate limit
-        minute_key = f"rate_limit:minute:{api_key}:{int(time.time() // 60)}"
-        minute_requests = self.redis_client.get(minute_key)
-        minute_requests = int(minute_requests) if minute_requests else 0
-        
-        if minute_requests >= limits["requests_per_minute"]:
-            return False, {
-                "limit_type": "minute",
-                "limit": limits["requests_per_minute"],
-                "current": minute_requests,
-                "reset_time": int(time.time() // 60 + 1) * 60
-            }
-        
-        # Check monthly rate limit
-        current_month = datetime.utcnow().strftime("%Y-%m")
-        month_key = f"rate_limit:month:{api_key}:{current_month}"
-        month_requests = self.redis_client.get(month_key)
-        month_requests = int(month_requests) if month_requests else 0
-        
-        if month_requests >= limits["requests_per_month"]:
-            # Calculate next month's timestamp
+        # If Redis is not available, allow the request but log the issue
+        if self.redis_client is None:
+            logger.warning("Redis not available, allowing request without rate limiting")
+            return True, {"limit_type": "none", "limit": 0, "current": 0, "reset_time": 0}
+            
+        try:
+            limits = settings.RATE_LIMITS.get(plan.value, settings.RATE_LIMITS["free"])
+            
+            # Check minute rate limit
+            minute_key = f"rate_limit:minute:{api_key}:{int(time.time() // 60)}"
+            minute_requests = self.redis_client.get(minute_key)
+            minute_requests = int(minute_requests) if minute_requests else 0
+            
+            if minute_requests >= limits["requests_per_minute"]:
+                return False, {
+                    "limit_type": "minute",
+                    "limit": limits["requests_per_minute"],
+                    "current": minute_requests,
+                    "reset_time": int(time.time() // 60 + 1) * 60
+                }
+            
+            # Check monthly rate limit
+            current_month = datetime.utcnow().strftime("%Y-%m")
+            month_key = f"rate_limit:month:{api_key}:{current_month}"
+            month_requests = self.redis_client.get(month_key)
+            month_requests = int(month_requests) if month_requests else 0
+            
+            if month_requests >= limits["requests_per_month"]:
+                # Calculate next month's timestamp
+                next_month = (datetime.utcnow().replace(day=1) + timedelta(days=32)).replace(day=1)
+                return False, {
+                    "limit_type": "month",
+                    "limit": limits["requests_per_month"],
+                    "current": month_requests,
+                    "reset_time": int(next_month.timestamp())
+                }
+            
+            # Increment counters
+            self.redis_client.incr(minute_key)
+            self.redis_client.expire(minute_key, 60)
+            
+            self.redis_client.incr(month_key)
+            # Set expiry for end of month
             next_month = (datetime.utcnow().replace(day=1) + timedelta(days=32)).replace(day=1)
-            return False, {
-                "limit_type": "month",
-                "limit": limits["requests_per_month"],
-                "current": month_requests,
-                "reset_time": int(next_month.timestamp())
+            self.redis_client.expireat(month_key, int(next_month.timestamp()))
+            
+            return True, {
+                "limit_type": "none",
+                "minute_limit": limits["requests_per_minute"],
+                "month_limit": limits["requests_per_month"],
+                "minute_remaining": limits["requests_per_minute"] - minute_requests - 1,
+                "month_remaining": limits["requests_per_month"] - month_requests - 1
             }
-        
-        # Increment counters
-        self.redis_client.incr(minute_key)
-        self.redis_client.expire(minute_key, 60)
-        
-        self.redis_client.incr(month_key)
-        # Set expiry for end of month
-        next_month = (datetime.utcnow().replace(day=1) + timedelta(days=32)).replace(day=1)
-        self.redis_client.expireat(month_key, int(next_month.timestamp()))
-        
-        return True, {
-            "limit_type": "none",
-            "minute_limit": limits["requests_per_minute"],
-            "month_limit": limits["requests_per_month"],
-            "minute_remaining": limits["requests_per_minute"] - minute_requests - 1,
-            "month_remaining": limits["requests_per_month"] - month_requests - 1
-        }
+        except Exception as e:
+            logger.error(f"Redis error during rate limit check: {e}")
+            # If Redis fails during operation, allow the request but log the error
+            return True, {"limit_type": "error", "limit": 0, "current": 0, "reset_time": 0}
     
     def get_rate_limit_info(self, api_key: str, plan: SubscriptionPlan) -> dict:
         """Get current rate limit information without incrementing counters"""
