@@ -185,15 +185,18 @@ backend:
 
   - task: "User Management API Routes Testing"
     implemented: true
-    working: false
+    working: true
     file: "/app/backend/app/api/v1/users.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: false
         agent: "main"
         comment: "API key management endpoints returning 403 errors despite valid JWT tokens"
+      - working: true
+        agent: "main"
+        comment: "FIXED: HTTPBearer dependency injection issue resolved. User management endpoints now working with proper JWT authentication."
 
   - task: "API Keys Management Testing"
     implemented: true
