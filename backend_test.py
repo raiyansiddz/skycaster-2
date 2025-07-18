@@ -638,7 +638,7 @@ class SKYCASTERAPITester:
         
         # Make 5 rapid requests to test rate limiting
         for i in range(5):
-            success, data, status = self.make_request('GET', '/api/v1/weather/current', 
+            success, data, status = self.make_request('GET', '/api/v1/weather-legacy/current', 
                                                      headers=headers, params=params)
             if success:
                 success_count += 1
