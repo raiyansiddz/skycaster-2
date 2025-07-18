@@ -236,10 +236,13 @@ backend:
       - working: "unknown"
         agent: "main"
         comment: "Not yet tested due to authentication issues"
+      - working: "unknown"
+        agent: "main"
+        comment: "HTTPAuthorizationCredentials fix applied. Ready for comprehensive testing of billing endpoints."
 
   - task: "Usage Analytics API Testing"
     implemented: true
-    working: false
+    working: "unknown"
     file: "/app/backend/app/api/v1/usage.py"
     stuck_count: 1
     priority: "high"
@@ -248,6 +251,9 @@ backend:
       - working: false
         agent: "main"
         comment: "Usage analytics endpoints returning 403 authentication errors"
+      - working: "unknown"
+        agent: "main"
+        comment: "HTTPAuthorizationCredentials fix applied. Need to re-test usage analytics endpoints with proper JWT authentication."
 
   - task: "Admin API Routes Testing"
     implemented: true
