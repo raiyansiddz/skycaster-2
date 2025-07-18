@@ -2,9 +2,12 @@ import redis
 import time
 from typing import Optional, Tuple
 from datetime import datetime, timedelta
+import logging
 
 from app.core.config import settings
 from app.models.subscription import SubscriptionPlan
+
+logger = logging.getLogger(__name__)
 
 class RateLimitService:
     def __init__(self):
