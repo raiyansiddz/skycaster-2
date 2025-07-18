@@ -154,13 +154,16 @@ backend:
     implemented: true
     working: "partial"
     file: "/app/backend/app/api/v1/auth.py"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: true
     status_history:
       - working: "partial"
         agent: "main"
         comment: "User registration works, but authenticated endpoints returning 403 errors. JWT token appears valid but authentication middleware may have issues."
+      - working: "partial"
+        agent: "testing"
+        comment: "PARTIAL FIX: JWT authentication works for /auth/me endpoint but fails for other protected endpoints (/api-keys, /usage) with 403 'Not authenticated' errors. Issue appears to be with get_current_active_user dependency chain, not JWT token generation."
 
   - task: "Weather API Endpoints Testing"
     implemented: true
