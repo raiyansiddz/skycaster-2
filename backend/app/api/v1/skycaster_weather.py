@@ -196,7 +196,7 @@ async def get_pricing_information(
 async def get_weather_usage_stats(
     limit: int = 10,
     db: Session = Depends(get_db),
-    auth_data: tuple = Depends(get_api_key_user)
+    current_user = Depends(get_current_active_user)
 ):
     """
     Get weather API usage statistics for the authenticated user
@@ -207,7 +207,9 @@ async def get_weather_usage_stats(
     - Success rates and response times
     - Recent request history
     """
-    user, api_key, subscription = auth_data
+    user = current_user
+    api_key = None  # Will be None for Bearer token authentication
+    subscription = None  # Will be None for Bearer token authentication
     
     try:
         # Get user's weather requests
