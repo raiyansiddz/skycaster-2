@@ -659,7 +659,7 @@ class SKYCASTERAPITester:
         """Test behavior with invalid API key"""
         headers = {'X-API-Key': 'invalid_key_12345'}
         params = {'location': 'London'}
-        success, data, status = self.make_request('GET', '/api/v1/weather/current', 
+        success, data, status = self.make_request('GET', '/api/v1/weather-legacy/current', 
                                                  headers=headers, params=params)
         
         if not success and status == 401:
