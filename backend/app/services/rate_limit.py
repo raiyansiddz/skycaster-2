@@ -84,38 +84,69 @@ class RateLimitService:
     
     def get_rate_limit_info(self, api_key: str, plan: SubscriptionPlan) -> dict:
         """Get current rate limit information without incrementing counters"""
-        limits = settings.RATE_LIMITS.get(plan.value, settings.RATE_LIMITS["free"])
-        
-        # Get current minute usage
-        minute_key = f"rate_limit:minute:{api_key}:{int(time.time() // 60)}"
-        minute_requests = self.redis_client.get(minute_key)
-        minute_requests = int(minute_requests) if minute_requests else 0
-        
-        # Get current month usage
-        current_month = datetime.utcnow().strftime("%Y-%m")
-        month_key = f"rate_limit:month:{api_key}:{current_month}"
-        month_requests = self.redis_client.get(month_key)
-        month_requests = int(month_requests) if month_requests else 0
-        
-        return {
-            "plan": plan.value,
-            "minute_limit": limits["requests_per_minute"],
-            "month_limit": limits["requests_per_month"],
-            "minute_used": minute_requests,
-            "month_used": month_requests,
-            "minute_remaining": limits["requests_per_minute"] - minute_requests,
-            "month_remaining": limits["requests_per_month"] - month_requests
-        }
+        if self.redis_client is None:
+            logger.warning("Redis not available, returning default rate limit info")
+            limits = settings.RATE_LIMITS.get(plan.value, settings.RATE_LIMITS["free"])
+            return {
+                "plan": plan.value,
+                "minute_limit": limits["requests_per_minute"],
+                "month_limit": limits["requests_per_month"],
+                "minute_used": 0,
+                "month_used": 0,
+                "minute_remaining": limits["requests_per_minute"],
+                "month_remaining": limits["requests_per_month"]
+            }
+            
+        try:
+            limits = settings.RATE_LIMITS.get(plan.value, settings.RATE_LIMITS["free"])
+            
+            # Get current minute usage
+            minute_key = f"rate_limit:minute:{api_key}:{int(time.time() // 60)}"
+            minute_requests = self.redis_client.get(minute_key)
+            minute_requests = int(minute_requests) if minute_requests else 0
+            
+            # Get current month usage
+            current_month = datetime.utcnow().strftime("%Y-%m")
+            month_key = f"rate_limit:month:{api_key}:{current_month}"
+            month_requests = self.redis_client.get(month_key)
+            month_requests = int(month_requests) if month_requests else 0
+            
+            return {
+                "plan": plan.value,
+                "minute_limit": limits["requests_per_minute"],
+                "month_limit": limits["requests_per_month"],
+                "minute_used": minute_requests,
+                "month_used": month_requests,
+                "minute_remaining": limits["requests_per_minute"] - minute_requests,
+                "month_remaining": limits["requests_per_month"] - month_requests
+            }
+        except Exception as e:
+            logger.error(f"Redis error during rate limit info retrieval: {e}")
+            limits = settings.RATE_LIMITS.get(plan.value, settings.RATE_LIMITS["free"])
+            return {
+                "plan": plan.value,
+                "minute_limit": limits["requests_per_minute"],
+                "month_limit": limits["requests_per_month"],
+                "minute_used": 0,
+                "month_used": 0,
+                "minute_remaining": limits["requests_per_minute"],
+                "month_remaining": limits["requests_per_month"]
+            }
     
     def reset_rate_limit(self, api_key: str) -> bool:
         """Reset rate limits for an API key (admin only)"""
+        if self.redis_client is None:
+            logger.warning("Redis not available, cannot reset rate limits")
+            return False
+            
         try:
             # Delete all rate limit keys for this API key
             keys = self.redis_client.keys(f"rate_limit:*:{api_key}:*")
             if keys:
                 self.redis_client.delete(*keys)
             return True
-        except Exception:
+        except Exception as e:
+            logger.error(f"Redis error during rate limit reset: {e}")
             return False
     
     def get_all_rate_limits(self) -> dict:
