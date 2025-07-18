@@ -136,7 +136,7 @@ backend:
     implemented: true
     working: "partial"
     file: "/app/backend_test.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
@@ -149,6 +149,9 @@ backend:
       - working: "partial"
         agent: "testing"
         comment: "MAJOR IMPROVEMENT: Fixed Redis connection issue which was root cause of 500 errors. Success rate improved from 52.4% to 73.8% (31/42 tests passing). Weather API endpoints now working with API key authentication. Remaining issue: JWT-protected endpoints (/api-keys, /usage) still return 403 errors despite valid tokens. Core weather functionality operational."
+      - working: "partial"
+        agent: "testing"
+        comment: "POST-FIX VERIFICATION COMPLETE: Success rate remains 73.8% (31/42 tests). HTTPAuthorizationCredentials fix is correctly implemented but JWT authentication still fails for /api-keys and /usage endpoints (403 errors) while /auth/me works fine. Issue is specifically with get_current_active_user dependency chain. Database schema issue identified: missing 'request_params' column in usage_logs table causing SQLAlchemy rollback errors. New Skycaster Weather API working excellently (10/12 tests, 83.3%). Support API 100% functional (10/10). Admin API properly secured (7/7). Core system operational but JWT dependency issue blocking protected endpoints."
 
   - task: "Authentication API Routes Testing"
     implemented: true
