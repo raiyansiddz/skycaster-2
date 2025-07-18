@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 
 from app.core.database import get_db
-from app.core.dependencies import get_api_key_user
+from app.core.dependencies import get_api_key_user, get_current_active_user
 from app.core.config import settings
 from app.services.skycaster_weather import SkycasterWeatherService
 from app.schemas.skycaster_weather import (
