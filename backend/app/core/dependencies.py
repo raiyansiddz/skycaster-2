@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, status, Header
-from fastapi.security import HTTPBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from typing import Optional
 
