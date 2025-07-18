@@ -134,11 +134,11 @@ backend:
 
   - task: "Backend API Testing"
     implemented: true
-    working: "unknown"
+    working: "partial"
     file: "/app/backend_test.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "partial"
         agent: "main"
@@ -146,6 +146,9 @@ backend:
       - working: "unknown"
         agent: "main"
         comment: "Backend server configuration fixed and now responding to health checks. Need to re-run comprehensive testing to verify all endpoints, especially authentication and weather API functions."
+      - working: "partial"
+        agent: "testing"
+        comment: "MAJOR IMPROVEMENT: Fixed Redis connection issue which was root cause of 500 errors. Success rate improved from 52.4% to 73.8% (31/42 tests passing). Weather API endpoints now working with API key authentication. Remaining issue: JWT-protected endpoints (/api-keys, /usage) still return 403 errors despite valid tokens. Core weather functionality operational."
 
   - task: "Authentication API Routes Testing"
     implemented: true
