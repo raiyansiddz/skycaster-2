@@ -285,6 +285,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Backend API Testing"
     - "Authentication API Routes Testing"
     - "Weather API Endpoints Testing"
     - "User Management API Routes Testing"
