@@ -11,7 +11,13 @@ logger = logging.getLogger(__name__)
 
 class RateLimitService:
     def __init__(self):
-        self.redis_client = redis.from_url(settings.REDIS_URL)
+        try:
+            self.redis_client = redis.from_url(settings.REDIS_URL)
+            # Test the connection
+            self.redis_client.ping()
+        except Exception as e:
+            logger.error(f"Redis connection failed: {e}")
+            self.redis_client = None
     
     def check_rate_limit(self, api_key: str, plan: SubscriptionPlan) -> Tuple[bool, dict]:
         """
