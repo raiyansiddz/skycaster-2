@@ -159,9 +159,13 @@ class SKYCASTERAPITester:
                                                  {'name': 'Test Key'}, headers=headers)
         
         if success and status == 200:
-            new_key = data.get('api_key', {}).get('key')
-            self.log_test("Create API Key", True, f"Created key: {new_key[:8]}...")
-            return True
+            new_key = data.get('key')  # API returns ApiKeyResponse directly
+            if new_key:
+                self.log_test("Create API Key", True, f"Created key: {new_key[:8]}...")
+                return True
+            else:
+                self.log_test("Create API Key", False, f"Missing key in response: {data}")
+                return False
         else:
             self.log_test("Create API Key", False, f"Status: {status}, Response: {data}")
             return False
