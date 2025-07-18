@@ -128,6 +128,9 @@ backend:
       - working: true
         agent: "main"
         comment: "Fixed supervisor configuration to correctly run 'app.main:app' instead of 'server:app'. Installed missing dependencies (httpcore, markupsafe). Backend server now running on port 8001."
+      - working: true
+        agent: "main"
+        comment: "FIXED: Supervisor configuration was reverted to 'server:app' causing module import errors. Re-applied correct configuration 'app.main:app' and added PYTHONPATH environment variable. Backend server now responding to health checks correctly."
 
   - task: "Backend API Testing"
     implemented: true
