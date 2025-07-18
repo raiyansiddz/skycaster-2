@@ -299,14 +299,14 @@ class SKYCASTERAPITester:
         success, data, status = self.make_request('POST', '/api/v1/weather/forecast', 
                                                  forecast_data, headers=headers)
         
-        if not success and status == 400:
+        if not success and status in [400, 422]:  # FastAPI returns 422 for validation errors
             error_detail = data.get('detail', '')
             self.log_test("Skycaster Weather Forecast (Invalid Variables)", True, 
                          f"Correctly rejected invalid variables: {error_detail}")
             return True
         else:
             self.log_test("Skycaster Weather Forecast (Invalid Variables)", False, 
-                         f"Expected 400 error, got {status}: {data}")
+                         f"Expected 400/422 error, got {status}: {data}")
             return False
 
     def test_skycaster_weather_forecast_invalid_coordinates(self):
