@@ -554,7 +554,7 @@ class SKYCASTERAPITester:
             
         headers = {'X-API-Key': self.api_key}
         params = {'query': 'London'}
-        success, data, status = self.make_request('GET', '/api/v1/weather/search', 
+        success, data, status = self.make_request('GET', '/api/v1/weather-legacy/search', 
                                                  headers=headers, params=params)
         
         if success and status == 200:
