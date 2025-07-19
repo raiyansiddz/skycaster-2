@@ -269,9 +269,15 @@ class SkycasterWeatherService:
         
         # Merge data from each endpoint
         for endpoint, response in endpoint_responses.items():
+            logger.info(f"Processing {endpoint} endpoint response: success={response.get('success')}")
             if response.get("success") and "data" in response:
                 data = response["data"]
                 variables = response["variables"]
+                logger.info(f"{endpoint} data type: {type(data)}, variables: {variables}")
+                
+                # Handle the data structure from Skycaster API
+                if isinstance(data, dict) and "data" in data:
+                    data = data["data"]  # Extract the actual data array
                 
                 # Process location data
                 for i, location in enumerate(locations):
@@ -280,6 +286,7 @@ class SkycasterWeatherService:
                     # Extract data for this location from the response
                     if isinstance(data, list) and i < len(data):
                         location_data = data[i]
+                        logger.info(f"{endpoint} location {i} data keys: {list(location_data.keys()) if location_data else 'None'}")
                     elif isinstance(data, dict) and location_key in data:
                         location_data = data[location_key]
                     else:
@@ -291,6 +298,10 @@ class SkycasterWeatherService:
                         for var in variables:
                             if var in location_data:
                                 unified_response[location_key][var] = location_data[var]
+                            else:
+                                logger.warning(f"Variable {var} not found in {endpoint} response for location {location_key}")
+            else:
+                logger.warning(f"{endpoint} endpoint failed: {response.get('error', 'Unknown error')}")
         
         return unified_response
     
