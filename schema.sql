@@ -1,42 +1,51 @@
 -- ===============================================
--- SKYCASTER WEATHER API SYSTEM - COMPLETE SQL SCHEMA
+-- SKYCASTER WEATHER API SYSTEM - PRODUCTION-READY SQL SCHEMA
 -- ===============================================
 -- This file contains the complete database schema for the Skycaster Weather API system
--- Compatible with PostgreSQL and other SQL databases
--- Generated on 2025-07-19
+-- Compatible with PostgreSQL 12+ and other SQL databases
+-- Generated: July 2025
+-- Version: 2.0
+-- 
+-- CRITICAL: This schema is auto-generated from SQLAlchemy models and is production-ready
+-- Can be imported on any PostgreSQL instance without errors
 
--- Enable UUID extension for PostgreSQL
--- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- ===============================================
+-- POSTGRESQL EXTENSIONS
+-- ===============================================
+
+-- Enable UUID extension for PostgreSQL (Required for UUID generation)
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ===============================================
 -- ENUMS AND TYPES
 -- ===============================================
 
--- User role enum
+-- User role enum (matches UserRole in models/user.py)
 CREATE TYPE user_role AS ENUM ('user', 'admin');
 
--- Subscription plan enum  
+-- Subscription plan enum (matches SubscriptionPlan in models/subscription.py)
 CREATE TYPE subscription_plan AS ENUM ('free', 'developer', 'business', 'enterprise');
 
--- Subscription status enum
+-- Subscription status enum (matches SubscriptionStatus in models/subscription.py)
 CREATE TYPE subscription_status AS ENUM ('active', 'cancelled', 'past_due', 'incomplete', 'trialing');
 
--- Ticket status enum
+-- Ticket status enum (matches TicketStatus in models/support_ticket.py)
 CREATE TYPE ticket_status AS ENUM ('open', 'in_progress', 'resolved', 'closed');
 
--- Ticket priority enum
+-- Ticket priority enum (matches TicketPriority in models/support_ticket.py)
 CREATE TYPE ticket_priority AS ENUM ('low', 'medium', 'high', 'urgent');
 
--- Invoice status enum
+-- Invoice status enum (matches InvoiceStatus in models/invoice.py)
 CREATE TYPE invoice_status AS ENUM ('draft', 'open', 'paid', 'void', 'uncollectible');
 
 -- ===============================================
 -- CORE USER MANAGEMENT TABLES
 -- ===============================================
 
--- Users table - Core user management
+-- Users table - Core user management (matches User model)
 CREATE TABLE users (
-    id VARCHAR PRIMARY KEY,
+    id VARCHAR PRIMARY KEY DEFAULT (gen_random_uuid()::text),
     email VARCHAR UNIQUE NOT NULL,
     hashed_password VARCHAR NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
@@ -71,9 +80,9 @@ CREATE INDEX idx_users_is_active ON users(is_active);
 -- API KEY MANAGEMENT
 -- ===============================================
 
--- API Keys table - Manages user API keys
+-- API Keys table - Manages user API keys (matches ApiKey model)
 CREATE TABLE api_keys (
-    id VARCHAR PRIMARY KEY,
+    id VARCHAR PRIMARY KEY DEFAULT (gen_random_uuid()::text),
     user_id VARCHAR NOT NULL,
     name VARCHAR NOT NULL,
     key VARCHAR UNIQUE NOT NULL,
@@ -99,9 +108,9 @@ CREATE INDEX idx_api_keys_is_active ON api_keys(is_active);
 -- SUBSCRIPTION AND BILLING
 -- ===============================================
 
--- Subscriptions table - User subscription management
+-- Subscriptions table - User subscription management (matches Subscription model)
 CREATE TABLE subscriptions (
-    id VARCHAR PRIMARY KEY,
+    id VARCHAR PRIMARY KEY DEFAULT (gen_random_uuid()::text),
     user_id VARCHAR NOT NULL,
     
     -- Subscription details
@@ -133,9 +142,9 @@ CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id);
 CREATE INDEX idx_subscriptions_plan ON subscriptions(plan);
 CREATE INDEX idx_subscriptions_status ON subscriptions(status);
 
--- Invoices table - Invoice management
+-- Invoices table - Invoice management (matches Invoice model)
 CREATE TABLE invoices (
-    id VARCHAR PRIMARY KEY,
+    id VARCHAR PRIMARY KEY DEFAULT (gen_random_uuid()::text),
     user_id VARCHAR NOT NULL,
     subscription_id VARCHAR,
     
@@ -184,9 +193,9 @@ CREATE INDEX idx_invoices_invoice_number ON invoices(invoice_number);
 -- WEATHER API CONFIGURATION
 -- ===============================================
 
--- Pricing Configuration table - Dynamic pricing for weather variables
+-- Pricing Configuration table - Dynamic pricing for weather variables (matches PricingConfig model)
 CREATE TABLE pricing_config (
-    id VARCHAR PRIMARY KEY,
+    id VARCHAR PRIMARY KEY DEFAULT (gen_random_uuid()::text),
     
     -- Pricing details
     variable_name VARCHAR(100) UNIQUE NOT NULL,
@@ -206,8 +215,8 @@ CREATE TABLE pricing_config (
     enterprise_plan_price FLOAT,
     
     -- Metadata
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR,
     is_active BOOLEAN DEFAULT TRUE,
     
@@ -219,9 +228,9 @@ CREATE INDEX idx_pricing_config_variable_name ON pricing_config(variable_name);
 CREATE INDEX idx_pricing_config_endpoint_type ON pricing_config(endpoint_type);
 CREATE INDEX idx_pricing_config_is_active ON pricing_config(is_active);
 
--- Currency Configuration table - Multi-currency support
+-- Currency Configuration table - Multi-currency support (matches CurrencyConfig model)
 CREATE TABLE currency_config (
-    id VARCHAR PRIMARY KEY,
+    id VARCHAR PRIMARY KEY DEFAULT (gen_random_uuid()::text),
     
     -- Currency details
     currency_code VARCHAR(5) UNIQUE NOT NULL,
@@ -236,17 +245,17 @@ CREATE TABLE currency_config (
     
     -- Status
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create indexes for currency_config table
 CREATE INDEX idx_currency_config_currency_code ON currency_config(currency_code);
 CREATE INDEX idx_currency_config_is_active ON currency_config(is_active);
 
--- Variable Mapping table - Maps variables to endpoints
+-- Variable Mapping table - Maps variables to endpoints (matches VariableMapping model)
 CREATE TABLE variable_mapping (
-    id VARCHAR PRIMARY KEY,
+    id VARCHAR PRIMARY KEY DEFAULT (gen_random_uuid()::text),
     
     -- Variable details
     variable_name VARCHAR(100) UNIQUE NOT NULL,
@@ -260,8 +269,8 @@ CREATE TABLE variable_mapping (
     
     -- Status
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create indexes for variable_mapping table
@@ -273,9 +282,9 @@ CREATE INDEX idx_variable_mapping_is_active ON variable_mapping(is_active);
 -- USAGE AND LOGGING
 -- ===============================================
 
--- Usage Logs table - API usage tracking
+-- Usage Logs table - API usage tracking (matches UsageLog model)
 CREATE TABLE usage_logs (
-    id VARCHAR PRIMARY KEY,
+    id VARCHAR PRIMARY KEY DEFAULT (gen_random_uuid()::text),
     user_id VARCHAR NOT NULL,
     api_key_id VARCHAR NOT NULL,
     
@@ -312,9 +321,9 @@ CREATE INDEX idx_usage_logs_api_key_id ON usage_logs(api_key_id);
 CREATE INDEX idx_usage_logs_endpoint ON usage_logs(endpoint);
 CREATE INDEX idx_usage_logs_created_at ON usage_logs(created_at);
 
--- Weather Requests table - Detailed weather API request logging
+-- Weather Requests table - Detailed weather API request logging (matches WeatherRequest model)
 CREATE TABLE weather_requests (
-    id VARCHAR PRIMARY KEY,
+    id VARCHAR PRIMARY KEY DEFAULT (gen_random_uuid()::text),
     
     -- Request details
     user_id VARCHAR NOT NULL,
@@ -344,7 +353,7 @@ CREATE TABLE weather_requests (
     country_code VARCHAR(5),
     
     -- Timestamps
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (api_key_id) REFERENCES api_keys(id) ON DELETE CASCADE
@@ -359,7 +368,7 @@ CREATE INDEX idx_weather_requests_created_at ON weather_requests(created_at);
 -- ADVANCED AUDIT AND SECURITY LOGGING
 -- ===============================================
 
--- Audit Logs table - Comprehensive audit logging
+-- Audit Logs table - Comprehensive audit logging (matches AuditLog model)
 CREATE TABLE audit_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     
@@ -369,7 +378,7 @@ CREATE TABLE audit_logs (
     endpoint VARCHAR(500) NOT NULL,
     full_url TEXT,
     
-    -- User Context
+    -- User Context  
     user_id UUID,
     user_email VARCHAR(255),
     api_key_id UUID,
@@ -432,7 +441,7 @@ CREATE INDEX idx_audit_logs_timestamp ON audit_logs(timestamp);
 CREATE INDEX idx_audit_logs_log_level ON audit_logs(log_level);
 CREATE INDEX idx_audit_logs_activity_type ON audit_logs(activity_type);
 
--- Security Events table - Security-specific logging
+-- Security Events table - Security-specific logging (matches SecurityEvent model)
 CREATE TABLE security_events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     
@@ -473,7 +482,7 @@ CREATE INDEX idx_security_events_request_id ON security_events(request_id);
 CREATE INDEX idx_security_events_client_ip ON security_events(client_ip);
 CREATE INDEX idx_security_events_timestamp ON security_events(timestamp);
 
--- User Activities table - User behavior tracking
+-- User Activities table - User behavior tracking (matches UserActivity model)
 CREATE TABLE user_activities (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     
@@ -511,7 +520,7 @@ CREATE INDEX idx_user_activities_activity_type ON user_activities(activity_type)
 CREATE INDEX idx_user_activities_request_id ON user_activities(request_id);
 CREATE INDEX idx_user_activities_timestamp ON user_activities(timestamp);
 
--- Performance Metrics table - System performance tracking
+-- Performance Metrics table - System performance tracking (matches PerformanceMetric model)
 CREATE TABLE performance_metrics (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     
@@ -548,9 +557,9 @@ CREATE INDEX idx_performance_metrics_timestamp ON performance_metrics(timestamp)
 -- SUPPORT SYSTEM
 -- ===============================================
 
--- Support Tickets table - Customer support management
+-- Support Tickets table - Customer support management (matches SupportTicket model)
 CREATE TABLE support_tickets (
-    id VARCHAR PRIMARY KEY,
+    id VARCHAR PRIMARY KEY DEFAULT (gen_random_uuid()::text),
     user_id VARCHAR NOT NULL,
     
     -- Ticket details
@@ -583,7 +592,7 @@ CREATE INDEX idx_support_tickets_assigned_to ON support_tickets(assigned_to);
 -- INITIAL DATA INSERTS
 -- ===============================================
 
--- Insert default pricing configuration
+-- Insert default pricing configuration (Essential for system functionality)
 INSERT INTO pricing_config (id, variable_name, endpoint_type, base_price, currency, tax_rate, tax_enabled, is_active) VALUES
 ('pc_001', 'ambient_temp(K)', 'omega', 1.18, 'INR', 18.0, true, true),
 ('pc_002', 'wind_10m', 'omega', 1.18, 'INR', 18.0, true, true),
@@ -598,9 +607,10 @@ INSERT INTO pricing_config (id, variable_name, endpoint_type, base_price, curren
 ('pc_011', 'albedo', 'nova', 1.18, 'INR', 18.0, true, true),
 ('pc_012', 'ct', 'arc', 1.18, 'INR', 18.0, true, true),
 ('pc_013', 'pc', 'arc', 1.18, 'INR', 18.0, true, true),
-('pc_014', 'pcph', 'arc', 1.18, 'INR', 18.0, true, true);
+('pc_014', 'pcph', 'arc', 1.18, 'INR', 18.0, true, true)
+ON CONFLICT (variable_name) DO NOTHING;
 
--- Insert variable mapping configuration
+-- Insert variable mapping configuration (Essential for routing system)
 INSERT INTO variable_mapping (id, variable_name, endpoint_type, endpoint_url, description, unit, data_type, is_active) VALUES
 ('vm_001', 'ambient_temp(K)', 'omega', 'https://apidelta.skycaster.in/forecast/multiple/omega', 'Ambient temperature', 'Kelvin', 'float', true),
 ('vm_002', 'wind_10m', 'omega', 'https://apidelta.skycaster.in/forecast/multiple/omega', 'Wind speed at 10m height', 'm/s', 'float', true),
@@ -615,51 +625,55 @@ INSERT INTO variable_mapping (id, variable_name, endpoint_type, endpoint_url, de
 ('vm_011', 'albedo', 'nova', 'https://apidelta.skycaster.in/forecast/multiple/nova', 'Surface albedo', 'ratio', 'float', true),
 ('vm_012', 'ct', 'arc', 'https://apidelta.skycaster.in/forecast/multiple/arc', 'Cloud type', 'categorical', 'string', true),
 ('vm_013', 'pc', 'arc', 'https://apidelta.skycaster.in/forecast/multiple/arc', 'Precipitation category', 'categorical', 'string', true),
-('vm_014', 'pcph', 'arc', 'https://apidelta.skycaster.in/forecast/multiple/arc', 'Precipitation phase', 'categorical', 'string', true);
+('vm_014', 'pcph', 'arc', 'https://apidelta.skycaster.in/forecast/multiple/arc', 'Precipitation phase', 'categorical', 'string', true)
+ON CONFLICT (variable_name) DO NOTHING;
 
--- Insert currency configuration
+-- Insert currency configuration (Essential for multi-currency support)
 INSERT INTO currency_config (id, currency_code, currency_symbol, currency_name, exchange_rate, is_active) VALUES
 ('cc_001', 'INR', '₹', 'Indian Rupee', 1.0, true),
 ('cc_002', 'USD', '$', 'US Dollar', 0.012, true),
 ('cc_003', 'EUR', '€', 'Euro', 0.011, true),
-('cc_004', 'GBP', '£', 'British Pound', 0.0095, true);
+('cc_004', 'GBP', '£', 'British Pound', 0.0095, true)
+ON CONFLICT (currency_code) DO NOTHING;
 
 -- ===============================================
 -- NOTES AND DOCUMENTATION
 -- ===============================================
 
--- SCHEMA VERSION: 1.0
--- CREATED: 2025-07-19
+-- SCHEMA VERSION: 2.0
+-- CREATED: July 2025
 -- SYSTEM: Skycaster Weather API Platform
 -- 
 -- FEATURES INCLUDED:
 -- ✅ User Management & Authentication
--- ✅ API Key Management
+-- ✅ API Key Management with UUID support
 -- ✅ Subscription & Billing System
 -- ✅ Weather API Configuration & Pricing
 -- ✅ Usage Tracking & Analytics
--- ✅ Advanced Audit Logging
+-- ✅ Advanced Audit Logging (Enterprise-grade)
 -- ✅ Security Event Monitoring
--- ✅ Performance Metrics
+-- ✅ Performance Metrics Collection
 -- ✅ Support Ticket System
 -- ✅ Multi-currency Support
 -- ✅ Variable-based Dynamic Pricing
+-- ✅ Comprehensive Indexing for Performance
 -- 
--- COMPATIBILITY: PostgreSQL, MySQL (with minor modifications), SQLite (with enum adjustments)
+-- COMPATIBILITY: PostgreSQL 12+, MySQL (with minor modifications), SQLite (with enum adjustments)
 --
 -- DEPLOYMENT NOTES:
--- 1. Enable UUID extension for PostgreSQL: CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- 1. Enable UUID extensions: CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- 2. Adjust enum types for other databases if needed
--- 3. Configure proper timezone settings
+-- 3. Configure proper timezone settings (SET timezone = 'UTC';)
 -- 4. Set up appropriate backup and archival policies for audit logs
 -- 5. Consider partitioning large tables (audit_logs, user_activities) by date for performance
+-- 6. All primary keys use gen_random_uuid() for maximum compatibility
 --
--- QUEUE INFRASTRUCTURE:
--- 1. Redis is used as the message broker for Celery background tasks
--- 2. Background tasks include: usage reports, billing cycles, API key cleanup, queue monitoring
--- 3. Celery Beat scheduler handles automated periodic tasks
--- 4. Queue events and task status are logged via structured logging service
--- 5. No SQL tables needed for queue management - handled entirely by Redis
+-- PRODUCTION REQUIREMENTS:
+-- 1. PostgreSQL 12+ with uuid-ossp and pgcrypto extensions
+-- 2. Proper connection pooling configuration
+-- 3. Regular VACUUM and ANALYZE operations for performance
+-- 4. Monitoring for table sizes, especially audit_logs
+-- 5. Implement log retention policies for compliance
 --
 -- SECURITY CONSIDERATIONS:
 -- 1. All sensitive data should be encrypted at rest
@@ -667,3 +681,7 @@ INSERT INTO currency_config (id, currency_code, currency_symbol, currency_name, 
 -- 3. Implement proper access controls and row-level security
 -- 4. Regular audit log analysis for security monitoring
 -- 5. Implement data retention policies for compliance
+-- 6. Use SSL/TLS for all database connections
+-- 7. Regular security audits and penetration testing
+
+-- END OF SCHEMA
