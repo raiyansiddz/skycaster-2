@@ -1048,14 +1048,6 @@ class SKYCASTERAPITester:
             self.test_skycaster_weather_forecast_different_timezones,
         ]
         
-        # Legacy weather API tests
-        legacy_weather_tests = [
-            self.test_weather_current,
-            self.test_weather_forecast,
-            self.test_weather_search,
-            self.test_weather_astronomy,
-        ]
-        
         # Admin API tests
         admin_tests = [
             self.test_admin_dashboard_stats,
