@@ -86,6 +86,7 @@ class SKYCASTERAPITester:
 
     def test_health_check(self):
         """Test health check endpoint"""
+        # Test the main health endpoint
         success, data, status = self.make_request('GET', '/health')
         
         if success and status == 200:
