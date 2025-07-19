@@ -147,10 +147,8 @@ def upgrade() -> None:
     op.create_foreign_key(None, 'invoices', 'subscriptions', ['subscription_id'], ['id'])
     op.drop_column('invoices', 'currency')
     op.create_foreign_key(None, 'pricing_config', 'users', ['created_by'], ['id'])
-    op.alter_column('usage_logs', 'request_params',
-               existing_type=sa.TEXT(),
-               type_=sa.JSON(),
-               existing_nullable=True)
+    # Handle existing usage_logs table - convert request_params using USING clause
+    op.execute("ALTER TABLE usage_logs ALTER COLUMN request_params TYPE JSON USING request_params::json")
     op.create_foreign_key(None, 'weather_requests', 'api_keys', ['api_key_id'], ['id'])
     op.create_foreign_key(None, 'weather_requests', 'users', ['user_id'], ['id'])
     # ### end Alembic commands ###
