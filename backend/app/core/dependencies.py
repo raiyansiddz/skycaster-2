@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status, Header
+from fastapi import Depends, HTTPException, status, Header, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -46,6 +46,47 @@ def get_current_user(
         )
     
     return user
+
+async def get_current_user_optional(request: Request, db: Session) -> Optional[User]:
+    """Get current user if JWT token is provided (optional) - for middleware use"""
+    try:
+        authorization = request.headers.get("authorization")
+        if not authorization or not authorization.startswith("Bearer "):
+            return None
+        
+        token = authorization.split(" ")[1]
+        payload = AuthService.verify_token(token)
+        if payload is None:
+            return None
+        
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            return None
+        
+        user = AuthService.get_user_by_id(db, user_id)
+        if user and user.is_active:
+            return user
+        
+    except Exception:
+        pass
+    
+    return None
+
+async def get_api_key_optional(request: Request, db: Session) -> Optional[ApiKey]:
+    """Get API key if provided (optional) - for middleware use"""
+    try:
+        api_key_header = request.headers.get("x-api-key")
+        if not api_key_header:
+            return None
+        
+        api_key = ApiKeyService.get_api_key_by_key(db, api_key_header)
+        if api_key:
+            return api_key
+        
+    except Exception:
+        pass
+    
+    return None
 
 def get_current_active_user(
     current_user: User = Depends(get_current_user)
