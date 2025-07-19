@@ -153,7 +153,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Fix critical backend issues and complete the Skycaster weather API system integration. The initial implementation is done, but database inconsistencies are blocking 88% of automated tests and all authenticated endpoint testing."
+user_problem_statement: "Fix critical backend issues and complete the Skycaster weather API system integration. The initial implementation is done, but database inconsistencies are blocking 88% of automated tests and all authenticated endpoint testing. Additionally, fix critical ENUM casing mismatch between database and Python API code causing DataError: invalid input value for enum subscription_plan."
 
 backend:
   - task: "Database Schema Fix"
