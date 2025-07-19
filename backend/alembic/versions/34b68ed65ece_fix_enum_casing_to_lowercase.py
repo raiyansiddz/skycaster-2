@@ -21,149 +21,149 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Fix enum casing from uppercase to lowercase to match SQLAlchemy models."""
     
-    # Fix subscription_plan enum (FREE -> free, etc.)
-    op.execute("ALTER TYPE subscription_plan RENAME TO subscription_plan_old")
-    op.execute("CREATE TYPE subscription_plan AS ENUM ('free', 'developer', 'business', 'enterprise')")
+    # Fix subscriptionplan enum (FREE -> free, etc.)
+    op.execute("ALTER TYPE subscriptionplan RENAME TO subscriptionplan_old")
+    op.execute("CREATE TYPE subscriptionplan AS ENUM ('free', 'developer', 'business', 'enterprise')")
     op.execute("""
         ALTER TABLE subscriptions 
-        ALTER COLUMN plan TYPE subscription_plan 
+        ALTER COLUMN plan TYPE subscriptionplan 
         USING CASE 
-            WHEN plan::text = 'FREE' THEN 'free'::subscription_plan
-            WHEN plan::text = 'DEVELOPER' THEN 'developer'::subscription_plan  
-            WHEN plan::text = 'BUSINESS' THEN 'business'::subscription_plan
-            WHEN plan::text = 'ENTERPRISE' THEN 'enterprise'::subscription_plan
-            ELSE plan::text::subscription_plan
+            WHEN plan::text = 'FREE' THEN 'free'::subscriptionplan
+            WHEN plan::text = 'DEVELOPER' THEN 'developer'::subscriptionplan  
+            WHEN plan::text = 'BUSINESS' THEN 'business'::subscriptionplan
+            WHEN plan::text = 'ENTERPRISE' THEN 'enterprise'::subscriptionplan
+            ELSE plan::text::subscriptionplan
         END
     """)
-    op.execute("DROP TYPE subscription_plan_old")
+    op.execute("DROP TYPE subscriptionplan_old")
     
-    # Fix subscription_status enum (ACTIVE -> active, etc.)
-    op.execute("ALTER TYPE subscription_status RENAME TO subscription_status_old")
-    op.execute("CREATE TYPE subscription_status AS ENUM ('active', 'cancelled', 'past_due', 'incomplete', 'trialing')")
+    # Fix subscriptionstatus enum (ACTIVE -> active, etc.)
+    op.execute("ALTER TYPE subscriptionstatus RENAME TO subscriptionstatus_old")
+    op.execute("CREATE TYPE subscriptionstatus AS ENUM ('active', 'cancelled', 'past_due', 'incomplete', 'trialing')")
     op.execute("""
         ALTER TABLE subscriptions 
-        ALTER COLUMN status TYPE subscription_status 
+        ALTER COLUMN status TYPE subscriptionstatus 
         USING CASE 
-            WHEN status::text = 'ACTIVE' THEN 'active'::subscription_status
-            WHEN status::text = 'CANCELLED' THEN 'cancelled'::subscription_status
-            WHEN status::text = 'PAST_DUE' THEN 'past_due'::subscription_status
-            WHEN status::text = 'INCOMPLETE' THEN 'incomplete'::subscription_status
-            WHEN status::text = 'TRIALING' THEN 'trialing'::subscription_status
-            ELSE status::text::subscription_status
+            WHEN status::text = 'ACTIVE' THEN 'active'::subscriptionstatus
+            WHEN status::text = 'CANCELLED' THEN 'cancelled'::subscriptionstatus
+            WHEN status::text = 'PAST_DUE' THEN 'past_due'::subscriptionstatus
+            WHEN status::text = 'INCOMPLETE' THEN 'incomplete'::subscriptionstatus
+            WHEN status::text = 'TRIALING' THEN 'trialing'::subscriptionstatus
+            ELSE status::text::subscriptionstatus
         END
     """)
-    op.execute("DROP TYPE subscription_status_old")
+    op.execute("DROP TYPE subscriptionstatus_old")
     
-    # Fix other enum types for consistency
-    op.execute("ALTER TYPE user_role RENAME TO user_role_old")
-    op.execute("CREATE TYPE user_role AS ENUM ('user', 'admin')")
+    # Fix userrole enum
+    op.execute("ALTER TYPE userrole RENAME TO userrole_old")
+    op.execute("CREATE TYPE userrole AS ENUM ('user', 'admin')")
     op.execute("""
         ALTER TABLE users 
-        ALTER COLUMN role TYPE user_role 
+        ALTER COLUMN role TYPE userrole 
         USING CASE 
-            WHEN role::text = 'USER' THEN 'user'::user_role
-            WHEN role::text = 'ADMIN' THEN 'admin'::user_role
-            ELSE role::text::user_role
+            WHEN role::text = 'USER' THEN 'user'::userrole
+            WHEN role::text = 'ADMIN' THEN 'admin'::userrole
+            ELSE role::text::userrole
         END
     """)
-    op.execute("DROP TYPE user_role_old")
+    op.execute("DROP TYPE userrole_old")
     
-    # Fix ticket_status enum
-    op.execute("ALTER TYPE ticket_status RENAME TO ticket_status_old")
-    op.execute("CREATE TYPE ticket_status AS ENUM ('open', 'in_progress', 'resolved', 'closed')")
+    # Fix ticketstatus enum
+    op.execute("ALTER TYPE ticketstatus RENAME TO ticketstatus_old")
+    op.execute("CREATE TYPE ticketstatus AS ENUM ('open', 'in_progress', 'resolved', 'closed')")
     op.execute("""
         ALTER TABLE support_tickets 
-        ALTER COLUMN status TYPE ticket_status 
+        ALTER COLUMN status TYPE ticketstatus 
         USING CASE 
-            WHEN status::text = 'OPEN' THEN 'open'::ticket_status
-            WHEN status::text = 'IN_PROGRESS' THEN 'in_progress'::ticket_status
-            WHEN status::text = 'RESOLVED' THEN 'resolved'::ticket_status
-            WHEN status::text = 'CLOSED' THEN 'closed'::ticket_status
-            ELSE status::text::ticket_status
+            WHEN status::text = 'OPEN' THEN 'open'::ticketstatus
+            WHEN status::text = 'IN_PROGRESS' THEN 'in_progress'::ticketstatus
+            WHEN status::text = 'RESOLVED' THEN 'resolved'::ticketstatus
+            WHEN status::text = 'CLOSED' THEN 'closed'::ticketstatus
+            ELSE status::text::ticketstatus
         END
     """)
-    op.execute("DROP TYPE ticket_status_old")
+    op.execute("DROP TYPE ticketstatus_old")
     
-    # Fix ticket_priority enum
-    op.execute("ALTER TYPE ticket_priority RENAME TO ticket_priority_old")
-    op.execute("CREATE TYPE ticket_priority AS ENUM ('low', 'medium', 'high', 'urgent')")
+    # Fix ticketpriority enum
+    op.execute("ALTER TYPE ticketpriority RENAME TO ticketpriority_old")
+    op.execute("CREATE TYPE ticketpriority AS ENUM ('low', 'medium', 'high', 'urgent')")
     op.execute("""
         ALTER TABLE support_tickets 
-        ALTER COLUMN priority TYPE ticket_priority 
+        ALTER COLUMN priority TYPE ticketpriority 
         USING CASE 
-            WHEN priority::text = 'LOW' THEN 'low'::ticket_priority
-            WHEN priority::text = 'MEDIUM' THEN 'medium'::ticket_priority
-            WHEN priority::text = 'HIGH' THEN 'high'::ticket_priority
-            WHEN priority::text = 'URGENT' THEN 'urgent'::ticket_priority
-            ELSE priority::text::ticket_priority
+            WHEN priority::text = 'LOW' THEN 'low'::ticketpriority
+            WHEN priority::text = 'MEDIUM' THEN 'medium'::ticketpriority
+            WHEN priority::text = 'HIGH' THEN 'high'::ticketpriority
+            WHEN priority::text = 'URGENT' THEN 'urgent'::ticketpriority
+            ELSE priority::text::ticketpriority
         END
     """)
-    op.execute("DROP TYPE ticket_priority_old")
+    op.execute("DROP TYPE ticketpriority_old")
     
-    # Fix invoice_status enum
-    op.execute("ALTER TYPE invoice_status RENAME TO invoice_status_old")
-    op.execute("CREATE TYPE invoice_status AS ENUM ('draft', 'open', 'paid', 'void', 'uncollectible')")
+    # Fix invoicestatus enum
+    op.execute("ALTER TYPE invoicestatus RENAME TO invoicestatus_old")
+    op.execute("CREATE TYPE invoicestatus AS ENUM ('draft', 'open', 'paid', 'void', 'uncollectible')")
     op.execute("""
         ALTER TABLE invoices 
-        ALTER COLUMN status TYPE invoice_status 
+        ALTER COLUMN status TYPE invoicestatus 
         USING CASE 
-            WHEN status::text = 'DRAFT' THEN 'draft'::invoice_status
-            WHEN status::text = 'OPEN' THEN 'open'::invoice_status
-            WHEN status::text = 'PAID' THEN 'paid'::invoice_status
-            WHEN status::text = 'VOID' THEN 'void'::invoice_status
-            WHEN status::text = 'UNCOLLECTIBLE' THEN 'uncollectible'::invoice_status
-            ELSE status::text::invoice_status
+            WHEN status::text = 'DRAFT' THEN 'draft'::invoicestatus
+            WHEN status::text = 'OPEN' THEN 'open'::invoicestatus
+            WHEN status::text = 'PAID' THEN 'paid'::invoicestatus
+            WHEN status::text = 'VOID' THEN 'void'::invoicestatus
+            WHEN status::text = 'UNCOLLECTIBLE' THEN 'uncollectible'::invoicestatus
+            ELSE status::text::invoicestatus
         END
     """)
-    op.execute("DROP TYPE invoice_status_old")
+    op.execute("DROP TYPE invoicestatus_old")
 
 
 def downgrade() -> None:
     """Revert enum casing from lowercase back to uppercase."""
     
-    # Revert subscription_plan enum (free -> FREE, etc.)
-    op.execute("ALTER TYPE subscription_plan RENAME TO subscription_plan_old")
-    op.execute("CREATE TYPE subscription_plan AS ENUM ('FREE', 'DEVELOPER', 'BUSINESS', 'ENTERPRISE')")
+    # Revert subscriptionplan enum (free -> FREE, etc.)
+    op.execute("ALTER TYPE subscriptionplan RENAME TO subscriptionplan_old")
+    op.execute("CREATE TYPE subscriptionplan AS ENUM ('FREE', 'DEVELOPER', 'BUSINESS', 'ENTERPRISE')")
     op.execute("""
         ALTER TABLE subscriptions 
-        ALTER COLUMN plan TYPE subscription_plan 
+        ALTER COLUMN plan TYPE subscriptionplan 
         USING CASE 
-            WHEN plan::text = 'free' THEN 'FREE'::subscription_plan
-            WHEN plan::text = 'developer' THEN 'DEVELOPER'::subscription_plan
-            WHEN plan::text = 'business' THEN 'BUSINESS'::subscription_plan
-            WHEN plan::text = 'enterprise' THEN 'ENTERPRISE'::subscription_plan
-            ELSE plan::text::subscription_plan
+            WHEN plan::text = 'free' THEN 'FREE'::subscriptionplan
+            WHEN plan::text = 'developer' THEN 'DEVELOPER'::subscriptionplan
+            WHEN plan::text = 'business' THEN 'BUSINESS'::subscriptionplan
+            WHEN plan::text = 'enterprise' THEN 'ENTERPRISE'::subscriptionplan
+            ELSE plan::text::subscriptionplan
         END
     """)
-    op.execute("DROP TYPE subscription_plan_old")
+    op.execute("DROP TYPE subscriptionplan_old")
     
-    # Revert subscription_status enum
-    op.execute("ALTER TYPE subscription_status RENAME TO subscription_status_old")
-    op.execute("CREATE TYPE subscription_status AS ENUM ('ACTIVE', 'CANCELLED', 'PAST_DUE', 'INCOMPLETE', 'TRIALING')")
+    # Revert subscriptionstatus enum
+    op.execute("ALTER TYPE subscriptionstatus RENAME TO subscriptionstatus_old")
+    op.execute("CREATE TYPE subscriptionstatus AS ENUM ('ACTIVE', 'CANCELLED', 'PAST_DUE', 'INCOMPLETE', 'TRIALING')")
     op.execute("""
         ALTER TABLE subscriptions 
-        ALTER COLUMN status TYPE subscription_status 
+        ALTER COLUMN status TYPE subscriptionstatus 
         USING CASE 
-            WHEN status::text = 'active' THEN 'ACTIVE'::subscription_status
-            WHEN status::text = 'cancelled' THEN 'CANCELLED'::subscription_status
-            WHEN status::text = 'past_due' THEN 'PAST_DUE'::subscription_status
-            WHEN status::text = 'incomplete' THEN 'INCOMPLETE'::subscription_status
-            WHEN status::text = 'trialing' THEN 'TRIALING'::subscription_status
-            ELSE status::text::subscription_status
+            WHEN status::text = 'active' THEN 'ACTIVE'::subscriptionstatus
+            WHEN status::text = 'cancelled' THEN 'CANCELLED'::subscriptionstatus
+            WHEN status::text = 'past_due' THEN 'PAST_DUE'::subscriptionstatus
+            WHEN status::text = 'incomplete' THEN 'INCOMPLETE'::subscriptionstatus
+            WHEN status::text = 'trialing' THEN 'TRIALING'::subscriptionstatus
+            ELSE status::text::subscriptionstatus
         END
     """)
-    op.execute("DROP TYPE subscription_status_old")
+    op.execute("DROP TYPE subscriptionstatus_old")
     
-    # Revert other enums...
-    op.execute("ALTER TYPE user_role RENAME TO user_role_old")
-    op.execute("CREATE TYPE user_role AS ENUM ('USER', 'ADMIN')")
+    # Revert userrole enum
+    op.execute("ALTER TYPE userrole RENAME TO userrole_old")
+    op.execute("CREATE TYPE userrole AS ENUM ('USER', 'ADMIN')")
     op.execute("""
         ALTER TABLE users 
-        ALTER COLUMN role TYPE user_role 
+        ALTER COLUMN role TYPE userrole 
         USING CASE 
-            WHEN role::text = 'user' THEN 'USER'::user_role
-            WHEN role::text = 'admin' THEN 'ADMIN'::user_role
-            ELSE role::text::user_role
+            WHEN role::text = 'user' THEN 'USER'::userrole
+            WHEN role::text = 'admin' THEN 'ADMIN'::userrole
+            ELSE role::text::userrole
         END
     """)
-    op.execute("DROP TYPE user_role_old")
+    op.execute("DROP TYPE userrole_old")
