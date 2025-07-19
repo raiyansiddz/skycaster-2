@@ -349,10 +349,7 @@ def main():
     import os
     backend_url = os.getenv('REACT_APP_BACKEND_URL', 'https://5edb712d-637c-41b4-837e-2041c1202984.preview.emergentagent.com')
     
-    # Ensure API prefix
-    if not backend_url.endswith('/api'):
-        backend_url = f"{backend_url}/api"
-    
+    # Don't add /api prefix here since we'll add it in the endpoints
     tester = BillingSummaryTester(backend_url)
     success = tester.run_all_tests()
     
