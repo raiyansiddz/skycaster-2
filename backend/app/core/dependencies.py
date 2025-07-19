@@ -12,28 +12,18 @@ from app.models.user import User, UserRole
 from app.models.api_key import ApiKey
 from app.models.subscription import Subscription
 
-security = HTTPBearer(auto_error=False)
+security = HTTPBearer()
 
 def get_current_user(
     db: Session = Depends(get_db),
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ) -> User:
     """Get current authenticated user from JWT token"""
-    print(f"DEBUG: get_current_user called with credentials: {credentials}")
-    
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
-    # Handle case where no credentials are provided (auto_error=False)
-    if credentials is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
     
     # Verify token
     payload = AuthService.verify_token(credentials.credentials)
