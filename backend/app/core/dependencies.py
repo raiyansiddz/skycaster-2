@@ -19,6 +19,8 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ) -> User:
     """Get current authenticated user from JWT token"""
+    print(f"DEBUG: get_current_user called with credentials: {credentials}")
+    
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
