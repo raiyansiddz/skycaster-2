@@ -86,8 +86,8 @@ class SKYCASTERAPITester:
 
     def test_health_check(self):
         """Test health check endpoint"""
-        # Test the main health endpoint
-        success, data, status = self.make_request('GET', '/health')
+        # Use the weather health endpoint since main health is not accessible via external URL
+        success, data, status = self.make_request('GET', '/api/v1/weather/health')
         
         if success and status == 200:
             self.log_test("Health Check", True, f"Status: {data.get('status', 'unknown')}")
