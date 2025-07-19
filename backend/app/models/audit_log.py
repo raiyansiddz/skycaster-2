@@ -174,7 +174,7 @@ class PerformanceMetric(Base):
     request_id = Column(String(255), nullable=True, index=True)
     
     # Additional Data
-    metadata = Column(JSON, nullable=True)
+    extra_metadata = Column(JSON, nullable=True)
     tags = Column(JSON, nullable=True)
     
     # Timestamps
