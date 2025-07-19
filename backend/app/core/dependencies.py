@@ -12,7 +12,7 @@ from app.models.user import User, UserRole
 from app.models.api_key import ApiKey
 from app.models.subscription import Subscription
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 def get_current_user(
     db: Session = Depends(get_db),
