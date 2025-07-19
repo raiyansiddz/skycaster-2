@@ -360,7 +360,7 @@ class AuditLoggingMiddleware(BaseHTTPMiddleware):
                 unit="ms",
                 endpoint=request_data["path"],
                 request_id=request_id,
-                metadata={
+                extra_metadata={
                     "method": request_data["method"],
                     "status_code": response_data["status_code"]
                 },
