@@ -1556,6 +1556,17 @@ class SKYCASTERAPITester:
                 self.log_test(test.__name__, False, f"Exception: {str(e)}")
             print()  # Add spacing between tests
         
+        print("=" * 60)
+        print("📊 ADVANCED AUDIT LOGGING TESTS")
+        print("=" * 60)
+        
+        for test in audit_logging_tests:
+            try:
+                test()
+            except Exception as e:
+                self.log_test(test.__name__, False, f"Exception: {str(e)}")
+            print()  # Add spacing between tests
+        
         # Print final results
         print("=" * 60)
         print(f"📊 Test Results Summary:")
