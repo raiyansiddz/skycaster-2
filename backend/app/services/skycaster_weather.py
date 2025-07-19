@@ -331,6 +331,32 @@ class SkycasterWeatherService:
         
         return {}
     
+    def _map_variable_name(self, requested_var: str, location_data: Dict[str, Any]) -> Optional[str]:
+        """Map requested variable names to API response field names"""
+        
+        # Wind variable mappings
+        wind_mappings = {
+            "wind_10m": "wind_speed_10",
+            "wind_100m": "wind_speed_100"
+        }
+        
+        # Check if we have a direct mapping
+        if requested_var in wind_mappings:
+            mapped_name = wind_mappings[requested_var]
+            if mapped_name in location_data:
+                return mapped_name
+        
+        # For complex wind data, we might need to combine speed and direction
+        if requested_var == "wind_10m" and "wind_speed_10" in location_data and "direction_10" in location_data:
+            # For now, return just the speed component
+            # In the future, could return structured wind data with both speed and direction
+            return "wind_speed_10"
+        
+        if requested_var == "wind_100m" and "wind_speed_100" in location_data and "direction_100" in location_data:
+            return "wind_speed_100"
+        
+        return None
+    
     async def _get_mock_responses(
         self,
         endpoint_groups: Dict[str, List[str]],
