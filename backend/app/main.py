@@ -13,6 +13,7 @@ from pathlib import Path
 from app.core.config import settings
 from app.core.database import engine
 from app.core.logging import setup_logging
+from app.middleware.audit_middleware import AuditLoggingMiddleware
 from app.api.v1.router import api_router
 from app.models import Base
 
@@ -32,6 +33,9 @@ app = FastAPI(
     redoc_url=None,
     openapi_url="/api/v1/openapi.json",
 )
+
+# Add comprehensive audit logging middleware
+app.add_middleware(AuditLoggingMiddleware)
 
 # CORS middleware
 app.add_middleware(
