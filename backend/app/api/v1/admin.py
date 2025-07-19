@@ -542,3 +542,399 @@ async def get_system_health(
         "error_rate_1h": round(error_rate, 2),
         "timestamp": datetime.utcnow().isoformat()
     }
+
+# ============ COMPREHENSIVE PRICING MANAGEMENT ============
+
+# Pricing Configuration Management
+@router.get("/pricing/configs", response_model=List[PricingConfigResponse])
+async def get_pricing_configs(
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    endpoint_type: Optional[str] = Query(None),
+    currency: Optional[str] = Query(None),
+    is_active: Optional[bool] = Query(None),
+    search: Optional[str] = Query(None)
+):
+    """Get all pricing configurations with advanced filtering"""
+    try:
+        configs = PricingService.get_pricing_configs(
+            db=db,
+            skip=skip,
+            limit=limit,
+            endpoint_type=endpoint_type,
+            currency=currency,
+            is_active=is_active,
+            search=search
+        )
+        return configs
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error retrieving pricing configurations: {str(e)}"
+        )
+
+@router.get("/pricing/configs/{config_id}", response_model=PricingConfigResponse)
+async def get_pricing_config(
+    config_id: str,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    """Get specific pricing configuration by ID"""
+    config = PricingService.get_pricing_config_by_id(db, config_id)
+    if not config:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Pricing configuration not found"
+        )
+    return config
+
+@router.post("/pricing/configs", response_model=PricingConfigResponse)
+async def create_pricing_config(
+    pricing_config: PricingConfigCreate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    """Create new pricing configuration"""
+    try:
+        config = PricingService.create_pricing_config(
+            db=db,
+            pricing_config=pricing_config,
+            created_by=current_admin.id
+        )
+        return config
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating pricing configuration: {str(e)}"
+        )
+
+@router.put("/pricing/configs/{config_id}", response_model=PricingConfigResponse)
+async def update_pricing_config(
+    config_id: str,
+    pricing_config: PricingConfigUpdate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    """Update pricing configuration"""
+    try:
+        config = PricingService.update_pricing_config(
+            db=db,
+            config_id=config_id,
+            pricing_config=pricing_config
+        )
+        if not config:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Pricing configuration not found"
+            )
+        return config
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating pricing configuration: {str(e)}"
+        )
+
+@router.delete("/pricing/configs/{config_id}")
+async def delete_pricing_config(
+    config_id: str,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    """Delete pricing configuration"""
+    try:
+        success = PricingService.delete_pricing_config(db, config_id)
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Pricing configuration not found"
+            )
+        return {"message": "Pricing configuration deleted successfully"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error deleting pricing configuration: {str(e)}"
+        )
+
+@router.post("/pricing/configs/bulk-update")
+async def bulk_update_pricing_configs(
+    bulk_update: BulkPricingUpdate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    """Bulk update pricing configurations"""
+    try:
+        result = PricingService.bulk_update_pricing(
+            db=db,
+            bulk_update=bulk_update,
+            updated_by=current_admin.id
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error performing bulk update: {str(e)}"
+        )
+
+# Currency Management
+@router.get("/pricing/currencies", response_model=List[CurrencyConfigResponse])
+async def get_currencies(
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user),
+    is_active: Optional[bool] = Query(None)
+):
+    """Get all currency configurations"""
+    try:
+        currencies = CurrencyService.get_currencies(db, is_active=is_active)
+        return currencies
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error retrieving currencies: {str(e)}"
+        )
+
+@router.post("/pricing/currencies", response_model=CurrencyConfigResponse)
+async def create_currency(
+    currency: CurrencyConfigCreate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    """Create new currency configuration"""
+    try:
+        new_currency = CurrencyService.create_currency(db, currency)
+        return new_currency
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating currency: {str(e)}"
+        )
+
+@router.put("/pricing/currencies/{currency_id}", response_model=CurrencyConfigResponse)
+async def update_currency(
+    currency_id: str,
+    currency: CurrencyConfigUpdate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    """Update currency configuration"""
+    try:
+        updated_currency = CurrencyService.update_currency(db, currency_id, currency)
+        if not updated_currency:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Currency configuration not found"
+            )
+        return updated_currency
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating currency: {str(e)}"
+        )
+
+# Variable Mapping Management
+@router.get("/pricing/variables", response_model=List[VariableMappingResponse])
+async def get_variables(
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user),
+    endpoint_type: Optional[str] = Query(None),
+    is_active: Optional[bool] = Query(None)
+):
+    """Get all variable mappings"""
+    try:
+        variables = VariableService.get_variables(
+            db, endpoint_type=endpoint_type, is_active=is_active
+        )
+        return variables
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error retrieving variables: {str(e)}"
+        )
+
+@router.post("/pricing/variables", response_model=VariableMappingResponse)
+async def create_variable(
+    variable: VariableMappingCreate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    """Create new variable mapping"""
+    try:
+        new_variable = VariableService.create_variable(db, variable)
+        return new_variable
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating variable: {str(e)}"
+        )
+
+@router.put("/pricing/variables/{variable_id}", response_model=VariableMappingResponse)
+async def update_variable(
+    variable_id: str,
+    variable: VariableMappingUpdate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    """Update variable mapping"""
+    try:
+        updated_variable = VariableService.update_variable(db, variable_id, variable)
+        if not updated_variable:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Variable mapping not found"
+            )
+        return updated_variable
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating variable: {str(e)}"
+        )
+
+# Analytics and Reporting
+@router.get("/pricing/analytics", response_model=PricingAnalytics)
+async def get_pricing_analytics(
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    """Get comprehensive pricing analytics"""
+    try:
+        analytics = PricingService.get_pricing_analytics(db)
+        return analytics
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error retrieving pricing analytics: {str(e)}"
+        )
+
+@router.get("/pricing/revenue-analytics", response_model=RevenueAnalytics)
+async def get_revenue_analytics(
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user),
+    days: int = Query(30, ge=1, le=365, description="Number of days for analytics")
+):
+    """Get revenue analytics for specified period"""
+    try:
+        end_date = datetime.utcnow()
+        start_date = end_date - timedelta(days=days)
+        
+        analytics = PricingService.get_revenue_analytics(db, start_date, end_date)
+        return analytics
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error retrieving revenue analytics: {str(e)}"
+        )
+
+# Data Export/Import
+@router.post("/pricing/export")
+async def export_pricing_data(
+    export_request: PricingExportRequest,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    """Export pricing data in specified format"""
+    try:
+        export_data = PricingService.export_pricing_data(db, export_request)
+        
+        # Determine content type and filename
+        if export_request.format == "json":
+            content_type = "application/json"
+            filename = f"pricing_configs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        elif export_request.format == "csv":
+            content_type = "text/csv"
+            filename = f"pricing_configs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        elif export_request.format == "xlsx":
+            content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            filename = f"pricing_configs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        
+        return StreamingResponse(
+            io.BytesIO(export_data),
+            media_type=content_type,
+            headers={"Content-Disposition": f"attachment; filename={filename}"}
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error exporting pricing data: {str(e)}"
+        )
+
+@router.post("/pricing/import", response_model=PricingImportResult)
+async def import_pricing_data(
+    import_request: PricingImportRequest,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    """Import pricing data from JSON/CSV format"""
+    try:
+        result = PricingService.import_pricing_data(
+            db=db,
+            import_request=import_request,
+            imported_by=current_admin.id
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error importing pricing data: {str(e)}"
+        )
+
+@router.post("/pricing/import/file", response_model=PricingImportResult)
+async def import_pricing_file(
+    file: UploadFile = File(...),
+    import_mode: str = Query("update", regex="^(create|update|replace)$"),
+    validate_only: bool = Query(False),
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    """Import pricing data from uploaded file (CSV, JSON, or Excel)"""
+    try:
+        # Read file content
+        content = await file.read()
+        
+        # Parse based on file type
+        if file.filename.endswith('.json'):
+            data = json.loads(content.decode('utf-8'))
+        elif file.filename.endswith('.csv'):
+            import pandas as pd
+            df = pd.read_csv(io.StringIO(content.decode('utf-8')))
+            data = df.to_dict('records')
+        elif file.filename.endswith(('.xlsx', '.xls')):
+            import pandas as pd
+            df = pd.read_excel(io.BytesIO(content))
+            data = df.to_dict('records')
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unsupported file format. Please use JSON, CSV, or Excel files."
+            )
+        
+        # Create import request
+        import_request = PricingImportRequest(
+            data=data,
+            import_mode=import_mode,
+            validate_only=validate_only
+        )
+        
+        # Process import
+        result = PricingService.import_pricing_data(
+            db=db,
+            import_request=import_request,
+            imported_by=current_admin.id
+        )
+        
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error importing file: {str(e)}"
+        )
