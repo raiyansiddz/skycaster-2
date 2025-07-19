@@ -130,8 +130,11 @@ class SkycasterTimingTester:
             return False
 
     def get_future_timestamp(self, hours_ahead: int) -> str:
-        """Get timestamp for future time"""
-        future_time = datetime.now() + timedelta(hours=hours_ahead)
+        """Get timestamp for future time in IST timezone"""
+        import pytz
+        ist = pytz.timezone('Asia/Kolkata')
+        current_time_ist = datetime.now(ist)
+        future_time = current_time_ist + timedelta(hours=hours_ahead)
         return future_time.strftime("%Y-%m-%d %H:%M:%S")
 
     def test_separate_endpoint_omega(self):
