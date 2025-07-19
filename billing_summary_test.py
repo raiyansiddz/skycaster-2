@@ -51,6 +51,12 @@ class BillingSummaryTester:
         if headers:
             request_headers.update(headers)
         
+        # Debug output for registration requests
+        if 'auth/register' in endpoint:
+            print(f"   DEBUG: Making request to {url}")
+            print(f"   DEBUG: Method: {method}")
+            print(f"   DEBUG: Data: {data}")
+        
         try:
             if method.upper() == 'GET':
                 response = self.session.get(url, headers=request_headers, params=params)
@@ -58,6 +64,12 @@ class BillingSummaryTester:
                 response = self.session.post(url, json=data, headers=request_headers, params=params)
             else:
                 return False, {"error": f"Unsupported method: {method}"}, 0
+            
+            # Debug output for registration requests
+            if 'auth/register' in endpoint:
+                print(f"   DEBUG: Response status: {response.status_code}")
+                print(f"   DEBUG: Response headers: {dict(response.headers)}")
+                print(f"   DEBUG: Response text: {response.text[:200]}...")
             
             try:
                 response_data = response.json()
