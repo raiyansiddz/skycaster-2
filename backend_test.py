@@ -156,7 +156,7 @@ class SKYCASTERAPITester:
             return False
             
         headers = {'Authorization': f'Bearer {self.token}'}
-        success, data, status = self.make_request('POST', '/api/v1/api-keys', 
+        success, data, status = self.make_request('POST', '/api/v1/api-keys/', 
                                                  {'name': 'Test Key'}, headers=headers)
         
         if success and status == 200:
