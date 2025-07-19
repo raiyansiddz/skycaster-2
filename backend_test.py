@@ -1494,6 +1494,23 @@ class SKYCASTERAPITester:
             self.test_support_faq,
         ]
         
+        # Advanced Audit Logging tests
+        audit_logging_tests = [
+            self.test_audit_logs_admin_access,
+            self.test_audit_logs_filtering,
+            self.test_security_events_endpoint,
+            self.test_user_activity_endpoint,
+            self.test_user_activity_by_id_admin,
+            self.test_performance_metrics_endpoint,
+            self.test_analytics_dashboard_endpoint,
+            self.test_real_time_activity_endpoint,
+            self.test_audit_logging_middleware_verification,
+            self.test_authentication_event_logging,
+            self.test_api_usage_tracking_verification,
+            self.test_security_event_detection,
+            self.test_audit_system_performance_impact,
+        ]
+        
         # Run all tests
         print("=" * 60)
         print("🔧 CORE API TESTS")
