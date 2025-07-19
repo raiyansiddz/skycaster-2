@@ -354,7 +354,30 @@ backend:
         agent: "main"
         comment: "All support ticket management endpoints working correctly (10/10 tests passing)"
 
-  - task: "Enterprise API Documentation Generation"
+  - task: "ENUM Casing Fix - Critical Database Schema Issue"
+    implemented: true
+    working: true  
+    file: "/app/backend/alembic/versions/34b68ed65ece_fix_enum_casing_to_lowercase.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "🎯 CRITICAL FIX COMPLETED: Fixed PostgreSQL enum casing mismatch that was causing DataError: 'invalid input value for enum subscription_plan: FREE'. Database enum types (subscriptionplan, subscriptionstatus, userrole, ticketstatus, ticketpriority, invoicestatus) converted from UPPERCASE to lowercase to match SQLAlchemy model definitions. Migration successfully ran and verified. Cleaned up old weather API environment variables (WEATHER_API_KEY, WEATHER_API_BASE_URL, USE_MOCK_WEATHER) from .env file."
+
+  - task: "Environment Configuration Cleanup" 
+    implemented: true
+    working: true
+    file: "/app/backend/.env"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main" 
+        comment: "Removed deprecated weather API configuration variables (WEATHER_API_KEY, WEATHER_API_BASE_URL, USE_MOCK_WEATHER) from backend .env file. Environment now clean and focused only on active integrations."
+
     implemented: false
     working: "unknown"
     file: "/app/backend/app/main.py"
