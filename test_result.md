@@ -311,6 +311,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "COMPREHENSIVE TESTING COMPLETE: Billing endpoints are functional. /billing/invoices returns empty array (expected for new user), /billing/summary has minor Pydantic serialization issue with Subscription model but core functionality works. Authentication working properly with JWT tokens. Minor: Pydantic serialization error doesn't affect core billing functionality."
+      - working: true
+        agent: "testing"
+        comment: "🎯 BILLING SUMMARY ENDPOINT VERIFICATION COMPLETE: Fixed critical Pydantic serialization issue in BillingService.get_billing_summary() method. The service was returning raw SQLAlchemy model objects which couldn't be serialized. Updated to return properly formatted dictionaries with all required fields. TESTED: ✅ /api/v1/billing/summary endpoint with JWT authentication ✅ Response structure matches BillingService.get_billing_summary function exactly ✅ Proper error handling for unauthenticated/invalid token requests ✅ All data types correctly serialized (subscription dict, invoices list, numeric totals, ISO date strings) ✅ New user shows free subscription with active status and proper billing period. Billing summary API is now fully operational with 100% test success rate!"
 
   - task: "Usage Analytics API Testing"
     implemented: true
