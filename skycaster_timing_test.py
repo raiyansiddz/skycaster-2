@@ -125,38 +125,8 @@ class SkycasterTimingTester:
         if self.token and self.api_key:
             self.log_test("User Registration & Setup", True, f"Token and API Key obtained")
             return True
-        
-        # Login to get JWT token
-        login_data = {
-            "username": user_data["email"],
-            "password": user_data["password"]
-        }
-        
-        success, data, status, _ = self.make_request('POST', '/api/v1/auth/login', login_data)
-        
-        if success and status == 200:
-            self.token = data.get('access_token')
-            self.user_id = data.get('user_id')
-            self.log_test("User Login", True, f"Token obtained, User ID: {self.user_id}")
         else:
-            self.log_test("User Login", False, f"Status: {status}, Response: {data}")
-            return False
-        
-        # Create API key
-        headers = {'Authorization': f'Bearer {self.token}'}
-        api_key_data = {
-            "name": "Timing Test API Key",
-            "description": "API key for timing and rate limiting tests"
-        }
-        
-        success, data, status, _ = self.make_request('POST', '/api/v1/api-keys/', api_key_data, headers=headers)
-        
-        if success and status == 201:
-            self.api_key = data.get('key')
-            self.log_test("API Key Creation", True, f"API Key: {self.api_key[:20]}...")
-            return True
-        else:
-            self.log_test("API Key Creation", False, f"Status: {status}, Response: {data}")
+            self.log_test("User Registration & Setup", False, f"Missing token or API key in response")
             return False
 
     def get_future_timestamp(self, hours_ahead: int) -> str:
