@@ -71,7 +71,8 @@ class BillingSummaryTester:
 
     def setup_test_user(self):
         """Create a test user for authentication"""
-        test_email = f"billing_test_{int(time.time())}@example.com"
+        import random
+        test_email = f"billing_test_{int(time.time())}_{random.randint(1000,9999)}@example.com"
         test_password = "BillingTest123!"
         
         success, data, status = self.make_request('POST', '/api/v1/auth/register', {
