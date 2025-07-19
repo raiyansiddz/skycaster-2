@@ -327,19 +327,15 @@ async def health_check():
         "mock_mode": use_mock
     }
 
-# Legacy endpoints for backward compatibility (will be deprecated)
+# Weather endpoints - Skycaster Weather API
 @router.get("/endpoints", response_model=dict)
 async def get_supported_endpoints():
     """
-    Get list of all supported weather endpoints (Legacy)
-    
-    **⚠️ DEPRECATED**: This endpoint is kept for backward compatibility.
-    Use `/variables` instead for comprehensive variable information.
+    Get list of all supported weather endpoints
     """
     endpoints = skycaster_service.get_supported_variables()
     return {
         "endpoints": endpoints,
-        "message": "This endpoint is deprecated. Use /weather/variables for detailed information.",
-        "authentication": "API Key required in X-API-Key header",
-        "new_system": "Skycaster intelligent routing system"
+        "authentication": "Bearer token required",
+        "system": "Skycaster intelligent routing system"
     }
