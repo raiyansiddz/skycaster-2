@@ -269,17 +269,48 @@ class BillingService:
         ).order_by(Invoice.created_at.desc()).limit(5).all()
         
         # Calculate total paid
-        total_paid = sum(inv.amount_paid for inv in invoices)
+        total_paid = sum(inv.amount_paid or 0 for inv in invoices)
         
         # Get outstanding balance
-        outstanding_balance = sum(inv.amount_due for inv in invoices if inv.status == InvoiceStatus.OPEN)
+        outstanding_balance = sum(inv.amount_due or 0 for inv in invoices if inv.status == InvoiceStatus.OPEN)
+        
+        # Convert subscription to dict if it exists
+        subscription_dict = None
+        if subscription:
+            subscription_dict = {
+                "id": subscription.id,
+                "user_id": subscription.user_id,
+                "plan": subscription.plan.value if subscription.plan else None,
+                "status": subscription.status.value if subscription.status else None,
+                "current_period_start": subscription.current_period_start.isoformat() if subscription.current_period_start else None,
+                "current_period_end": subscription.current_period_end.isoformat() if subscription.current_period_end else None,
+                "created_at": subscription.created_at.isoformat() if subscription.created_at else None
+            }
+        
+        # Convert invoices to list of dicts
+        invoices_list = []
+        for inv in invoices:
+            invoices_list.append({
+                "id": inv.id,
+                "user_id": inv.user_id,
+                "invoice_number": inv.invoice_number,
+                "status": inv.status.value if inv.status else None,
+                "subtotal": float(inv.subtotal or 0),
+                "total": float(inv.total or 0),
+                "amount_due": float(inv.amount_due or 0),
+                "amount_paid": float(inv.amount_paid or 0),
+                "invoice_date": inv.invoice_date.isoformat() if inv.invoice_date else None,
+                "due_date": inv.due_date.isoformat() if inv.due_date else None,
+                "paid_at": inv.paid_at.isoformat() if inv.paid_at else None,
+                "created_at": inv.created_at.isoformat() if inv.created_at else None
+            })
         
         return {
-            "current_subscription": subscription,
-            "recent_invoices": invoices,
-            "total_paid": total_paid,
-            "outstanding_balance": outstanding_balance,
-            "next_billing_date": subscription.current_period_end if subscription else None
+            "current_subscription": subscription_dict,
+            "recent_invoices": invoices_list,
+            "total_paid": float(total_paid),
+            "outstanding_balance": float(outstanding_balance),
+            "next_billing_date": subscription.current_period_end.isoformat() if subscription and subscription.current_period_end else None
         }
     
     @staticmethod
