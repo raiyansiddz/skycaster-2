@@ -55,6 +55,7 @@ def upgrade() -> None:
     op.execute("DROP TYPE subscriptionstatus_old")
     
     # Fix userrole enum
+    op.execute("ALTER TABLE users ALTER COLUMN role DROP DEFAULT")
     op.execute("ALTER TYPE userrole RENAME TO userrole_old")
     op.execute("CREATE TYPE userrole AS ENUM ('user', 'admin')")
     op.execute("""
@@ -67,6 +68,7 @@ def upgrade() -> None:
         END
     """)
     op.execute("DROP TYPE userrole_old")
+    op.execute("ALTER TABLE users ALTER COLUMN role SET DEFAULT 'user'::userrole")
     
     # Fix ticketstatus enum
     op.execute("ALTER TYPE ticketstatus RENAME TO ticketstatus_old")
