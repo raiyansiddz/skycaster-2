@@ -22,6 +22,8 @@ def upgrade() -> None:
     """Fix enum casing from uppercase to lowercase to match SQLAlchemy models."""
     
     # Fix subscriptionplan enum (FREE -> free, etc.)
+    op.execute("ALTER TABLE subscriptions ALTER COLUMN plan DROP DEFAULT")
+    op.execute("ALTER TABLE subscriptions ALTER COLUMN status DROP DEFAULT")
     op.execute("ALTER TYPE subscriptionplan RENAME TO subscriptionplan_old")
     op.execute("CREATE TYPE subscriptionplan AS ENUM ('free', 'developer', 'business', 'enterprise')")
     op.execute("""
@@ -36,6 +38,7 @@ def upgrade() -> None:
         END
     """)
     op.execute("DROP TYPE subscriptionplan_old")
+    op.execute("ALTER TABLE subscriptions ALTER COLUMN plan SET DEFAULT 'free'::subscriptionplan")
     
     # Fix subscriptionstatus enum (ACTIVE -> active, etc.)
     op.execute("ALTER TYPE subscriptionstatus RENAME TO subscriptionstatus_old")
@@ -53,6 +56,7 @@ def upgrade() -> None:
         END
     """)
     op.execute("DROP TYPE subscriptionstatus_old")
+    op.execute("ALTER TABLE subscriptions ALTER COLUMN status SET DEFAULT 'active'::subscriptionstatus")
     
     # Fix userrole enum
     op.execute("ALTER TABLE users ALTER COLUMN role DROP DEFAULT")
