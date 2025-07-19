@@ -22,7 +22,7 @@ class Invoice(Base):
     
     # Invoice details
     invoice_number = Column(String, unique=True, nullable=False)
-    status = Column(Enum(InvoiceStatus), nullable=False, default=InvoiceStatus.DRAFT)
+    status = Column(Enum(InvoiceStatus, values_callable=lambda x: [e.value for e in x]), nullable=False, default=InvoiceStatus.DRAFT)
     
     # Stripe details
     stripe_invoice_id = Column(String)
