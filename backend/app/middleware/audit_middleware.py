@@ -270,7 +270,7 @@ class AuditLoggingMiddleware(BaseHTTPMiddleware):
                 user_agent=request_data["user_agent"],
                 log_level="ERROR",
                 activity_type="system_error",
-                metadata={
+                extra_metadata={
                     "error": str(error),
                     "error_type": type(error).__name__
                 }
