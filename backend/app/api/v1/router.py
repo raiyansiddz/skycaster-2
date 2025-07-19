@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1 import auth, users, api_keys, subscriptions, billing, usage, admin, support, skycaster_weather
+from app.api.v1 import auth, users, api_keys, subscriptions, billing, usage, admin, support, skycaster_weather, audit_analytics
 
 api_router = APIRouter()
 
@@ -19,3 +19,6 @@ api_router.include_router(billing.router, prefix="/billing", tags=["Billing"])
 api_router.include_router(usage.router, prefix="/usage", tags=["Usage & Analytics"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
 api_router.include_router(support.router, prefix="/support", tags=["Support"])
+
+# Advanced Audit Analytics
+api_router.include_router(audit_analytics.router, prefix="/audit", tags=["Audit Analytics"])
