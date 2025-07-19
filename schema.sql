@@ -654,6 +654,13 @@ INSERT INTO currency_config (id, currency_code, currency_symbol, currency_name, 
 -- 4. Set up appropriate backup and archival policies for audit logs
 -- 5. Consider partitioning large tables (audit_logs, user_activities) by date for performance
 --
+-- QUEUE INFRASTRUCTURE:
+-- 1. Redis is used as the message broker for Celery background tasks
+-- 2. Background tasks include: usage reports, billing cycles, API key cleanup, queue monitoring
+-- 3. Celery Beat scheduler handles automated periodic tasks
+-- 4. Queue events and task status are logged via structured logging service
+-- 5. No SQL tables needed for queue management - handled entirely by Redis
+--
 -- SECURITY CONSIDERATIONS:
 -- 1. All sensitive data should be encrypted at rest
 -- 2. API keys should be hashed before storage
