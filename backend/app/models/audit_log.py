@@ -69,7 +69,7 @@ class AuditLog(Base):
     activity_type = Column(String(50), nullable=True, index=True)  # auth, api_call, admin, billing, etc.
     
     # Additional Context
-    metadata = Column(JSON, nullable=True)
+    extra_metadata = Column(JSON, nullable=True)
     tags = Column(JSON, nullable=True)  # Array of tags for categorization
     
     def __repr__(self):
