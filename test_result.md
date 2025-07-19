@@ -364,7 +364,7 @@ backend:
     status_history:
       - working: true
         agent: "main"
-        comment: "🎯 CRITICAL FIX COMPLETED: Fixed PostgreSQL enum casing mismatch that was causing DataError: 'invalid input value for enum subscription_plan: FREE'. Database enum types (subscriptionplan, subscriptionstatus, userrole, ticketstatus, ticketpriority, invoicestatus) converted from UPPERCASE to lowercase to match SQLAlchemy model definitions. Migration successfully ran and verified. Cleaned up old weather API environment variables (WEATHER_API_KEY, WEATHER_API_BASE_URL, USE_MOCK_WEATHER) from .env file."
+        comment: "🎯 CRITICAL FIX COMPLETED AND VERIFIED: Fixed PostgreSQL enum casing mismatch that was causing DataError: 'invalid input value for enum subscription_plan: FREE'. Database enum types (subscriptionplan, subscriptionstatus, userrole, ticketstatus, ticketpriority, invoicestatus) converted from UPPERCASE to lowercase to match SQLAlchemy model definitions. Testing agent also identified and fixed SQLAlchemy enum mapping issue in model files using values_callable parameter. Migration successfully ran and verified. Cleaned up old weather API environment variables (WEATHER_API_KEY, WEATHER_API_BASE_URL, USE_MOCK_WEATHER) from .env file. TESTED: User registration works (created user test_enum_fix@example.com with role='user'), subscription creation works (created free subscription with plan='free', status='active'). System is now fully operational without any enum casing errors."
 
   - task: "Environment Configuration Cleanup" 
     implemented: true
