@@ -544,22 +544,21 @@ class SKYCASTERAPITester:
             return False
 
     def test_rate_limiting(self):
-        """Test rate limiting functionality"""
+        """Test API rate limiting"""
         if not self.api_key:
             self.log_test("Rate Limiting", False, "No API key available")
             return False
             
         print("\n🔄 Testing rate limiting (making multiple requests)...")
         headers = {'X-API-Key': self.api_key}
-        params = {'location': 'London'}
         
         success_count = 0
         rate_limited = False
         
-        # Make 5 rapid requests to test rate limiting
+        # Make 5 rapid requests to test rate limiting on health endpoint
         for i in range(5):
-            success, data, status = self.make_request('GET', '/api/v1/weather-legacy/current', 
-                                                     headers=headers, params=params)
+            success, data, status = self.make_request('GET', '/api/v1/weather/health', 
+                                                     headers=headers)
             if success:
                 success_count += 1
             elif status == 429:  # Rate limited
