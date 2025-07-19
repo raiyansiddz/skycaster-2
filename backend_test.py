@@ -1105,17 +1105,6 @@ class SKYCASTERAPITester:
             print()  # Add spacing between tests
         
         print("=" * 60)
-        print("🌦️  LEGACY WEATHER API TESTS")
-        print("=" * 60)
-        
-        for test in legacy_weather_tests:
-            try:
-                test()
-            except Exception as e:
-                self.log_test(test.__name__, False, f"Exception: {str(e)}")
-            print()  # Add spacing between tests
-        
-        print("=" * 60)
         print("👑 ADMIN API TESTS")
         print("=" * 60)
         
