@@ -226,7 +226,16 @@ class SkycasterWeatherService:
                     "variables": payload["variables"]
                 }
             else:
-                error_msg = f"HTTP {response.status_code}: {response.text}"
+                # Try to parse JSON error response
+                try:
+                    error_data = response.json()
+                    if "Error" in error_data:
+                        error_msg = f"Skycaster API Error: {error_data['Error']}"
+                    else:
+                        error_msg = f"HTTP {response.status_code}: {error_data}"
+                except:
+                    error_msg = f"HTTP {response.status_code}: {response.text}"
+                
                 logger.error(f"Error from {endpoint}: {error_msg}")
                 return {
                     "success": False,
