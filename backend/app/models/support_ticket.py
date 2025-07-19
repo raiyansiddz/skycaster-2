@@ -27,8 +27,8 @@ class SupportTicket(Base):
     # Ticket details
     title = Column(String, nullable=False)
     description = Column(Text, nullable=False)
-    status = Column(Enum(TicketStatus), nullable=False, default=TicketStatus.OPEN)
-    priority = Column(Enum(TicketPriority), nullable=False, default=TicketPriority.MEDIUM)
+    status = Column(Enum(TicketStatus, values_callable=lambda x: [e.value for e in x]), nullable=False, default=TicketStatus.OPEN)
+    priority = Column(Enum(TicketPriority, values_callable=lambda x: [e.value for e in x]), nullable=False, default=TicketPriority.MEDIUM)
     
     # Assignment
     assigned_to = Column(String)  # Admin user ID
