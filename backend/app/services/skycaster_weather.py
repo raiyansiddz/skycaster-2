@@ -296,10 +296,14 @@ class SkycasterWeatherService:
                     # Add variable data to unified response
                     if location_data:
                         for var in variables:
-                            if var in location_data:
+                            # Handle variable name mapping for wind data
+                            mapped_var = self._map_variable_name(var, location_data)
+                            if mapped_var and mapped_var in location_data:
+                                unified_response[location_key][var] = location_data[mapped_var]
+                            elif var in location_data:
                                 unified_response[location_key][var] = location_data[var]
                             else:
-                                logger.warning(f"Variable {var} not found in {endpoint} response for location {location_key}")
+                                logger.warning(f"Variable {var} (mapped: {mapped_var}) not found in {endpoint} response for location {location_key}")
             else:
                 logger.warning(f"{endpoint} endpoint failed: {response.get('error', 'Unknown error')}")
         
