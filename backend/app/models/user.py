@@ -18,7 +18,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
-    role = Column(Enum(UserRole), default=UserRole.USER)
+    role = Column(Enum(UserRole, values_callable=lambda x: [e.value for e in x]), default=UserRole.USER)
     
     # Profile fields
     first_name = Column(String)
