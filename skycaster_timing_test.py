@@ -112,9 +112,19 @@ class SkycasterTimingTester:
         
         success, data, status, _ = self.make_request('POST', '/api/v1/auth/register', user_data)
         
-        if not success or status != 201:
+        if not success or status != 200:
             self.log_test("User Registration", False, f"Status: {status}, Response: {data}")
             return False
+        
+        # Extract token and API key from registration response
+        self.token = data.get('access_token')
+        self.user_id = data.get('user', {}).get('id')
+        api_key_data = data.get('api_key', {})
+        self.api_key = api_key_data.get('key')
+        
+        if self.token and self.api_key:
+            self.log_test("User Registration & Setup", True, f"Token and API Key obtained")
+            return True
         
         # Login to get JWT token
         login_data = {
