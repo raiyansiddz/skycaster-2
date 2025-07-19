@@ -213,7 +213,7 @@ class AuditLoggingMiddleware(BaseHTTPMiddleware):
                 log_level="INFO" if response_data["status_code"] < 400 else "ERROR",
                 
                 # Metadata
-                metadata={
+                extra_metadata={
                     "request_id": request_id,
                     "processing_time_ms": processing_time,
                     "success": response_data["status_code"] < 400
