@@ -8,7 +8,7 @@
 ## Test Execution Details
 
 **Test Environment:**
-- Backend URL: `https://460f813e-b331-44bc-8dd9-e489d2f34057.preview.emergentagent.com`
+- Backend URL: `https://5edb712d-637c-41b4-837e-2041c1202984.preview.emergentagent.com`
 - Test Date: July 19, 2025
 - Test Duration: ~2 minutes
 - Test Suite: backend_test.py (comprehensive coverage)

@@ -361,7 +361,7 @@ class EnumCasingTester:
 def main():
     # Get backend URL from environment
     import os
-    backend_url = os.getenv('REACT_APP_BACKEND_URL', 'https://460f813e-b331-44bc-8dd9-e489d2f34057.preview.emergentagent.com')
+    backend_url = os.getenv('REACT_APP_BACKEND_URL', 'https://5edb712d-637c-41b4-837e-2041c1202984.preview.emergentagent.com')
     
     if not backend_url.endswith('/api'):
         backend_url = f"{backend_url}/api"
