@@ -218,7 +218,7 @@ class QuickAPITester:
 
 if __name__ == "__main__":
     import sys
-    base_url = sys.argv[1] if len(sys.argv) > 1 else "https://e7d1f414-95d5-4fe9-9fd2-83c0d70b80c2.preview.emergentagent.com/api"
+    base_url = sys.argv[1] if len(sys.argv) > 1 else "https://460f813e-b331-44bc-8dd9-e489d2f34057.preview.emergentagent.com/api"
     
     tester = QuickAPITester(base_url)
     tester.run_tests()
