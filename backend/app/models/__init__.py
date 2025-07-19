@@ -6,6 +6,7 @@ from app.models.usage_log import UsageLog
 from app.models.invoice import Invoice
 from app.models.support_ticket import SupportTicket
 from app.models.pricing_config import PricingConfig, CurrencyConfig, VariableMapping, WeatherRequest
+from app.models.audit_log import AuditLog, SecurityEvent, UserActivity, PerformanceMetric
 
 __all__ = [
     "Base",
@@ -18,5 +19,9 @@ __all__ = [
     "PricingConfig",
     "CurrencyConfig", 
     "VariableMapping",
-    "WeatherRequest"
+    "WeatherRequest",
+    "AuditLog",
+    "SecurityEvent", 
+    "UserActivity",
+    "PerformanceMetric"
 ]
