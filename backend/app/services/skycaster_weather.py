@@ -66,6 +66,25 @@ class SkycasterWeatherService:
         start_time = datetime.utcnow()
         
         try:
+            # Validate timestamp is in the future
+            try:
+                # Parse the timestamp
+                timestamp_dt = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+                # Add timezone awareness
+                tz = pytz.timezone(timezone)
+                timestamp_dt = tz.localize(timestamp_dt)
+                
+                # Check if timestamp is in the future (allowing 1 hour buffer)
+                current_time = datetime.now(tz)
+                if timestamp_dt <= current_time:
+                    raise ValueError(f"Timestamp must be in the future. Current time: {current_time.strftime('%Y-%m-%d %H:%M:%S %Z')}, Requested: {timestamp_dt.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+                    
+            except Exception as e:
+                if "Timestamp must be in the future" in str(e):
+                    raise e
+                else:
+                    raise ValueError(f"Invalid timestamp format. Expected 'YYYY-MM-DD HH:MM:SS': {e}")
+            
             # Validate variables
             invalid_vars = [var for var in variables if var not in self.variable_to_endpoint]
             if invalid_vars:
