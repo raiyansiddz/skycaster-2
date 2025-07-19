@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1 import auth, users, api_keys, subscriptions, weather, billing, usage, admin, support, skycaster_weather
+from app.api.v1 import auth, users, api_keys, subscriptions, billing, usage, admin, support, skycaster_weather
 
 api_router = APIRouter()
 
@@ -13,8 +13,7 @@ api_router.include_router(subscriptions.router, prefix="/subscriptions", tags=["
 # New Skycaster Weather API (replaces old weather.router)
 api_router.include_router(skycaster_weather.router, prefix="/weather", tags=["Skycaster Weather API"])
 
-# Legacy weather router (for backward compatibility - will be deprecated)
-api_router.include_router(weather.router, prefix="/weather-legacy", tags=["Legacy Weather API (Deprecated)"])
+# Legacy weather router removed - weather module no longer available
 
 api_router.include_router(billing.router, prefix="/billing", tags=["Billing"])
 api_router.include_router(usage.router, prefix="/usage", tags=["Usage & Analytics"])
