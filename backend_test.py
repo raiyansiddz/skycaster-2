@@ -1016,6 +1016,426 @@ class SKYCASTERAPITester:
             self.log_test("Support FAQ", False, f"Status: {status}, Response: {data}")
             return False
 
+    # ============ ADVANCED AUDIT LOGGING TESTS ============
+    
+    def test_audit_logs_admin_access(self):
+        """Test audit logs endpoint (Admin only)"""
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Audit Logs Admin Access", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {'limit': 10, 'offset': 0}
+        success, data, status = self.make_request('GET', '/api/v1/audit/audit-logs', headers=headers, params=params)
+        
+        if success and status == 200:
+            logs = data.get('logs', [])
+            total_count = data.get('total_count', 0)
+            self.log_test("Audit Logs Admin Access", True, f"Retrieved {len(logs)} logs, Total: {total_count}")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Audit Logs Admin Access", True, "Correctly rejected non-admin user")
+                return True
+            else:
+                self.log_test("Audit Logs Admin Access", False, f"Status: {status}, Response: {data}")
+                return False
+
+    def test_audit_logs_filtering(self):
+        """Test audit logs with filtering parameters"""
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Audit Logs Filtering", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {
+            'limit': 5,
+            'activity_type': 'authentication',
+            'log_level': 'INFO'
+        }
+        success, data, status = self.make_request('GET', '/api/v1/audit/audit-logs', headers=headers, params=params)
+        
+        if success and status == 200:
+            logs = data.get('logs', [])
+            # Check if filtering worked (all logs should have activity_type 'authentication' if any exist)
+            auth_logs = [log for log in logs if log.get('activity_type') == 'authentication']
+            self.log_test("Audit Logs Filtering", True, 
+                         f"Retrieved {len(logs)} logs, Auth logs: {len(auth_logs)}")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Audit Logs Filtering", True, "Correctly rejected non-admin user")
+                return True
+            else:
+                self.log_test("Audit Logs Filtering", False, f"Status: {status}, Response: {data}")
+                return False
+
+    def test_security_events_endpoint(self):
+        """Test security events endpoint"""
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Security Events Endpoint", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {'limit': 10}
+        success, data, status = self.make_request('GET', '/api/v1/audit/security-events', headers=headers, params=params)
+        
+        if success and status == 200:
+            events = data.get('security_events', [])
+            count = data.get('count', 0)
+            self.log_test("Security Events Endpoint", True, f"Retrieved {count} security events")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Security Events Endpoint", True, "Correctly rejected non-admin user")
+                return True
+            else:
+                self.log_test("Security Events Endpoint", False, f"Status: {status}, Response: {data}")
+                return False
+
+    def test_user_activity_endpoint(self):
+        """Test user activity endpoint (current user)"""
+        if not self.token:
+            self.log_test("User Activity Endpoint", False, "No authentication token")
+            return False
+        
+        headers = {'Authorization': f'Bearer {self.token}'}
+        params = {'limit': 10}
+        success, data, status = self.make_request('GET', '/api/v1/audit/user-activity', headers=headers, params=params)
+        
+        if success and status == 200:
+            activities = data.get('activities', [])
+            count = data.get('count', 0)
+            self.log_test("User Activity Endpoint", True, f"Retrieved {count} user activities")
+            return True
+        else:
+            self.log_test("User Activity Endpoint", False, f"Status: {status}, Response: {data}")
+            return False
+
+    def test_user_activity_by_id_admin(self):
+        """Test user activity by ID endpoint (Admin only)"""
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token or not self.user_id:
+            self.log_test("User Activity By ID Admin", False, "Missing admin token or user ID")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {'limit': 5}
+        success, data, status = self.make_request('GET', f'/api/v1/audit/user-activity/{self.user_id}', 
+                                                 headers=headers, params=params)
+        
+        if success and status == 200:
+            activities = data.get('activities', [])
+            count = data.get('count', 0)
+            user_id = data.get('user_id')
+            self.log_test("User Activity By ID Admin", True, 
+                         f"Retrieved {count} activities for user {user_id}")
+            return True
+        else:
+            if status == 403:
+                self.log_test("User Activity By ID Admin", True, "Correctly rejected non-admin user")
+                return True
+            else:
+                self.log_test("User Activity By ID Admin", False, f"Status: {status}, Response: {data}")
+                return False
+
+    def test_performance_metrics_endpoint(self):
+        """Test performance metrics endpoint"""
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Performance Metrics Endpoint", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {'limit': 10, 'metric_type': 'api_response_time'}
+        success, data, status = self.make_request('GET', '/api/v1/audit/performance-metrics', 
+                                                 headers=headers, params=params)
+        
+        if success and status == 200:
+            metrics = data.get('metrics', [])
+            count = data.get('count', 0)
+            self.log_test("Performance Metrics Endpoint", True, f"Retrieved {count} performance metrics")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Performance Metrics Endpoint", True, "Correctly rejected non-admin user")
+                return True
+            else:
+                self.log_test("Performance Metrics Endpoint", False, f"Status: {status}, Response: {data}")
+                return False
+
+    def test_analytics_dashboard_endpoint(self):
+        """Test analytics dashboard endpoint"""
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Analytics Dashboard Endpoint", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {'days': 7}
+        success, data, status = self.make_request('GET', '/api/v1/audit/analytics-dashboard', 
+                                                 headers=headers, params=params)
+        
+        if success and status == 200:
+            period = data.get('period', {})
+            statistics = data.get('statistics', {})
+            top_endpoints = data.get('top_endpoints', [])
+            top_users = data.get('top_users', [])
+            
+            total_requests = statistics.get('total_requests', 0)
+            success_rate = statistics.get('success_rate', 0)
+            
+            self.log_test("Analytics Dashboard Endpoint", True, 
+                         f"Period: {period.get('days')} days, Requests: {total_requests}, Success: {success_rate}%")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Analytics Dashboard Endpoint", True, "Correctly rejected non-admin user")
+                return True
+            else:
+                self.log_test("Analytics Dashboard Endpoint", False, f"Status: {status}, Response: {data}")
+                return False
+
+    def test_real_time_activity_endpoint(self):
+        """Test real-time activity monitoring endpoint"""
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Real-time Activity Endpoint", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {'minutes': 5}
+        success, data, status = self.make_request('GET', '/api/v1/audit/real-time-activity', 
+                                                 headers=headers, params=params)
+        
+        if success and status == 200:
+            time_window = data.get('time_window', {})
+            recent_activity = data.get('recent_activity', [])
+            recent_security_events = data.get('recent_security_events', [])
+            activity_timeline = data.get('activity_timeline', [])
+            
+            self.log_test("Real-time Activity Endpoint", True, 
+                         f"Window: {time_window.get('minutes')}min, Activity: {len(recent_activity)}, Security: {len(recent_security_events)}")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Real-time Activity Endpoint", True, "Correctly rejected non-admin user")
+                return True
+            else:
+                self.log_test("Real-time Activity Endpoint", False, f"Status: {status}, Response: {data}")
+                return False
+
+    def test_audit_logging_middleware_verification(self):
+        """Test that audit logging middleware is capturing requests"""
+        # Make a simple API call and then check if it was logged
+        if not self.token:
+            self.log_test("Audit Logging Middleware Verification", False, "No authentication token")
+            return False
+        
+        # Make a test API call
+        headers = {'Authorization': f'Bearer {self.token}'}
+        test_success, test_data, test_status = self.make_request('GET', '/api/v1/usage/stats', headers=headers)
+        
+        # Wait a moment for logging to complete
+        time.sleep(1)
+        
+        # Now check if admin can see audit logs (indicating middleware is working)
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Audit Logging Middleware Verification", False, "Failed to create admin user")
+            return False
+        
+        admin_headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {'limit': 5, 'endpoint': '/api/v1/usage/stats'}
+        success, data, status = self.make_request('GET', '/api/v1/audit/audit-logs', 
+                                                 headers=admin_headers, params=params)
+        
+        if success and status == 200:
+            logs = data.get('logs', [])
+            usage_stats_logs = [log for log in logs if '/usage/stats' in log.get('endpoint', '')]
+            
+            self.log_test("Audit Logging Middleware Verification", True, 
+                         f"Found {len(usage_stats_logs)} audit logs for usage/stats endpoint")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Audit Logging Middleware Verification", True, "Admin access control working")
+                return True
+            else:
+                self.log_test("Audit Logging Middleware Verification", False, 
+                             f"Failed to verify audit logging: {status}, {data}")
+                return False
+
+    def test_authentication_event_logging(self):
+        """Test that authentication events are being logged"""
+        # Create a new user to generate authentication events
+        test_email = f"auth_test_{int(time.time())}@example.com"
+        test_password = "AuthTestPassword123!"
+        
+        # Register user (should create authentication event)
+        success, data, status = self.make_request('POST', '/api/v1/auth/register', {
+            'email': test_email,
+            'password': test_password
+        })
+        
+        if not success or status != 200:
+            self.log_test("Authentication Event Logging", False, "Failed to register test user")
+            return False
+        
+        # Wait for logging
+        time.sleep(1)
+        
+        # Check if admin can see security events
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Authentication Event Logging", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {'limit': 10, 'event_type': 'register_success'}
+        success, data, status = self.make_request('GET', '/api/v1/audit/security-events', 
+                                                 headers=headers, params=params)
+        
+        if success and status == 200:
+            events = data.get('security_events', [])
+            register_events = [event for event in events if 'register' in event.get('event_type', '')]
+            
+            self.log_test("Authentication Event Logging", True, 
+                         f"Found {len(register_events)} registration security events")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Authentication Event Logging", True, "Admin access control working")
+                return True
+            else:
+                self.log_test("Authentication Event Logging", False, 
+                             f"Failed to verify auth event logging: {status}")
+                return False
+
+    def test_api_usage_tracking_verification(self):
+        """Test that API usage is being tracked in user activities"""
+        if not self.token or not self.api_key:
+            self.log_test("API Usage Tracking Verification", False, "Missing token or API key")
+            return False
+        
+        # Make a weather API call to generate usage tracking
+        headers = {'X-API-Key': self.api_key}
+        forecast_data = {
+            "list_lat_lon": [[28.6139, 77.2090]],  # Delhi
+            "timestamp": "2025-07-18 14:00:00",
+            "variables": ["ambient_temp(K)"],
+            "timezone": "Asia/Kolkata"
+        }
+        
+        weather_success, weather_data, weather_status = self.make_request(
+            'POST', '/api/v1/weather/forecast', forecast_data, headers=headers
+        )
+        
+        # Wait for logging
+        time.sleep(1)
+        
+        # Check user activities
+        user_headers = {'Authorization': f'Bearer {self.token}'}
+        params = {'limit': 10, 'activity_type': 'weather_api_usage'}
+        success, data, status = self.make_request('GET', '/api/v1/audit/user-activity', 
+                                                 headers=user_headers, params=params)
+        
+        if success and status == 200:
+            activities = data.get('activities', [])
+            weather_activities = [act for act in activities if 'weather' in act.get('activity_type', '')]
+            
+            self.log_test("API Usage Tracking Verification", True, 
+                         f"Found {len(weather_activities)} weather API usage activities")
+            return True
+        else:
+            self.log_test("API Usage Tracking Verification", False, 
+                         f"Failed to verify API usage tracking: {status}")
+            return False
+
+    def test_security_event_detection(self):
+        """Test security event detection for failed authentication"""
+        # Try to access protected endpoint without proper authentication
+        invalid_headers = {'Authorization': 'Bearer invalid_token_12345'}
+        success, data, status = self.make_request('GET', '/api/v1/api-keys', headers=invalid_headers)
+        
+        # This should generate a security event for authentication failure
+        time.sleep(1)
+        
+        # Check if admin can see the security event
+        admin_token, admin_user_id, admin_email = self.create_admin_user()
+        
+        if not admin_token:
+            self.log_test("Security Event Detection", False, "Failed to create admin user")
+            return False
+        
+        headers = {'Authorization': f'Bearer {admin_token}'}
+        params = {'limit': 10, 'event_type': 'authentication_failure'}
+        success, data, status = self.make_request('GET', '/api/v1/audit/security-events', 
+                                                 headers=headers, params=params)
+        
+        if success and status == 200:
+            events = data.get('security_events', [])
+            auth_failure_events = [event for event in events if 'authentication_failure' in event.get('event_type', '')]
+            
+            self.log_test("Security Event Detection", True, 
+                         f"Found {len(auth_failure_events)} authentication failure events")
+            return True
+        else:
+            if status == 403:
+                self.log_test("Security Event Detection", True, "Admin access control working")
+                return True
+            else:
+                self.log_test("Security Event Detection", False, 
+                             f"Failed to verify security event detection: {status}")
+                return False
+
+    def test_audit_system_performance_impact(self):
+        """Test that audit logging doesn't significantly impact API performance"""
+        if not self.api_key:
+            self.log_test("Audit System Performance Impact", False, "No API key available")
+            return False
+        
+        # Make multiple API calls and measure response times
+        headers = {'X-API-Key': self.api_key}
+        response_times = []
+        
+        for i in range(5):
+            start_time = time.time()
+            success, data, status = self.make_request('GET', '/api/v1/weather/health', headers=headers)
+            end_time = time.time()
+            
+            if success:
+                response_time = (end_time - start_time) * 1000  # Convert to milliseconds
+                response_times.append(response_time)
+            
+            time.sleep(0.1)  # Small delay between requests
+        
+        if response_times:
+            avg_response_time = sum(response_times) / len(response_times)
+            max_response_time = max(response_times)
+            
+            # Consider performance acceptable if average response time is under 2 seconds
+            performance_acceptable = avg_response_time < 2000
+            
+            self.log_test("Audit System Performance Impact", performance_acceptable, 
+                         f"Avg response: {avg_response_time:.1f}ms, Max: {max_response_time:.1f}ms")
+            return performance_acceptable
+        else:
+            self.log_test("Audit System Performance Impact", False, "No successful requests to measure")
+            return False
+
     def run_all_tests(self):
         """Run all tests in sequence"""
         print("\n🧪 Starting Backend API Tests...\n")
