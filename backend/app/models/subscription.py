@@ -26,8 +26,8 @@ class Subscription(Base):
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
     
     # Subscription details
-    plan = Column(Enum(SubscriptionPlan), nullable=False, default=SubscriptionPlan.FREE)
-    status = Column(Enum(SubscriptionStatus), nullable=False, default=SubscriptionStatus.ACTIVE)
+    plan = Column(Enum(SubscriptionPlan, values_callable=lambda x: [e.value for e in x]), nullable=False, default=SubscriptionPlan.FREE)
+    status = Column(Enum(SubscriptionStatus, values_callable=lambda x: [e.value for e in x]), nullable=False, default=SubscriptionStatus.ACTIVE)
     
     # Stripe details
     stripe_subscription_id = Column(String)
