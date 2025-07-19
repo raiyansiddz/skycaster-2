@@ -99,6 +99,57 @@
 
 
 #====================================================================================================
+# 🚨 Developer Setup & Contribution Rules
+#====================================================================================================
+
+📌 1. Always `EDIT FIRST`, then `TEST`, then `DEPLOY`.
+   - If you're adding or modifying a feature that requires database changes,
+     update `schema.sql` and `schema_generator.py` **first**, then implement the code.
+
+📌 2. Use this Supervisor config for backend execution:
+   command=/root/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8001 --workers 1 --reload  
+   environment=PYTHONPATH="/app/backend"
+
+📌 3. Redis & Celery should ALWAYS be started in this order:
+   a. Start Redis:
+      `sudo service redis-server restart`
+   b. Start Celery:
+      `celery -A app.worker worker --loglevel=info`
+
+📌 4. Use only the defined Enums for columns using PostgreSQL ENUM type.
+   Any new enum added **must** be updated in `schema.sql`.
+
+📌 5. No logic should break if schema.sql is executed in a new SQL editor.
+   It should build the entire system structure from scratch.
+
+📌 6. Database Schema Management:
+   - Production-ready schema.sql is available in `/app/schema.sql`
+   - Use `/app/backend/schema_generator.py` to auto-generate schema from SQLAlchemy models
+   - Schema supports PostgreSQL 12+ with UUID extensions
+   - All models use UUID primary keys for scalability
+
+📌 7. Schema Generator Usage:
+   ```bash
+   # Set database URL
+   export SCHEMA_DB_URL="postgresql://user:password@host:port/database"
+   
+   # Generate fresh schema (recommended for new databases)
+   python /app/backend/schema_generator.py --mode=create
+   
+   # Recreate schema (drops existing tables - DEV ONLY)
+   python /app/backend/schema_generator.py --mode=recreate
+   
+   # Validate existing schema
+   python /app/backend/schema_generator.py --mode=validate
+   ```
+
+📌 8. Database Migration Guidelines:
+   - Always backup database before schema changes
+   - Test schema.sql on staging environment first
+   - Use Alembic for production migrations: `alembic upgrade head`
+   - Schema generator is for development and fresh installations only
+
+#====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
