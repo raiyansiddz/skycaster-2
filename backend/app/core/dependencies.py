@@ -27,6 +27,14 @@ def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     
+    # Handle case where no credentials are provided (auto_error=False)
+    if credentials is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
     # Verify token
     payload = AuthService.verify_token(credentials.credentials)
     if payload is None:
